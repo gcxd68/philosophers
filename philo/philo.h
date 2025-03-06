@@ -63,9 +63,9 @@ struct s_data
 	long	time_to_sleep;
 	long	max_meals;
 	long	start_time;
-	bool	sim_end;
+	bool	end_sim;
 	t_fork	fork;
 	t_philo	philo;
-}
+};
 
 #endif
