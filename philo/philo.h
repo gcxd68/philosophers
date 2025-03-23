@@ -13,27 +13,15 @@
 #ifndef PHILO_H
 # define PHILO_H
 
-//# include <ctype.h>
-//# include <errno.h>
-//# include <fcntl.h>
 # include <limits.h>
-//# include <math.h>
 # include <pthread.h>
-//# include <stdarg.h>
 # include <stdbool.h>
-//# include <stddef.h>
-//# include <stdint.h>
 # include <stdlib.h>
 # include <stdio.h>
-//# include <string.h>
-//# include <strings.h>
-//# include <time.h>
 # include <unistd.h>
-//# include <bsd/string.h>
-//# include <sys/wait.h>
 # include <sys/time.h>
 
-# define DEBUG_MODE 1
+# define DEBUG_MODE 0
 
 typedef pthread_mutex_t	t_mutex;
 

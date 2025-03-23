@@ -29,23 +29,19 @@ long	ft_get_time(t_tc time_code)
 
 static void	ft_usleep(long sleep_time, t_data *data)
 {
-	long	start_time;
-	long	remaining_time;
-	long	current_time;
+	const long	start_time = ft_get_time(MICROSECOND);
+	const long	end_time = start_time + sleep_time;
+	long		current_time;
 
-	start_time = ft_get_time(MICROSECOND);
-	current_time = start_time;
-	while (current_time - start_time < sleep_time)
+	while (!ft_sim_is_over(data))
 	{
-		if (ft_sim_is_over(data))
-			break ;
-		remaining_time = start_time + sleep_time - current_time;
-		if (remaining_time > 1e3)
-			usleep (remaining_time / 2);
-		else
-			while (current_time - start_time < sleep_time)
-				current_time = ft_get_time(MICROSECOND);
 		current_time = ft_get_time(MICROSECOND);
+		if (current_time >= end_time)
+			break ;
+		if (end_time - current_time < 1000)
+			continue ;
+		else
+			usleep((end_time - current_time) / 2);
 	}
 }
 
