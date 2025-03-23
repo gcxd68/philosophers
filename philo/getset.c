@@ -32,7 +32,7 @@ bool	ft_get_bool(t_mutex *mutex, bool *value)
 void	ft_set_long(t_mutex *mutex, long *dest, long value)
 {
 	pthread_mutex_lock(mutex);
-	*dest = value; 
+	*dest = value;
 	pthread_mutex_unlock(mutex);
 }
 
@@ -46,7 +46,7 @@ long	ft_get_long(t_mutex *mutex, long *value)
 	return (ret);
 }
 
-bool	ft_sim_is_over(t_data *data)// REDONDANT ? REMPLACER PAR UN GET_BOOL ?
+bool	ft_sim_is_over(t_data *data)
 {
-	return (ft_get_bool(&data->mutex, &data->end_sim));
+	return (ft_get_bool(&data->state_mutex, &data->end_sim));
 }
