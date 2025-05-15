@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: gdosch <marvin@42.fr>                      +#+  +:+       +#+         #
+#    By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/05 11:47:52 by gdosch            #+#    #+#              #
-#    Updated: 2024/11/05 11:47:53 by gdosch           ###   ########.fr        #
+#    Updated: 2025/05/15 16:50:55 by gdosch           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,7 @@ OBJ =			$(SRC:.c=.o)
 
 NAME =			philo
 CC =			cc
-CFLAGS =		-Wall -Wextra -Werror
+CFLAGS =		-Wall -Wextra -Werror -g3 -fsanitize=thread
 
 all:			$(NAME)
 

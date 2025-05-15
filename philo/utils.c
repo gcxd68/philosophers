@@ -111,7 +111,6 @@ static int	ft_fed_or_dead(t_data *d, t_philo philo, long time_since_last_meal)
 void	*ft_monitor(void *data)
 {
 	t_data	*d;
-	t_philo	philo;
 	long	current_time;
 	long	last_meal;
 	int		i;
@@ -124,10 +123,9 @@ void	*ft_monitor(void *data)
 		i = -1;
 		while (++i < d->philo_nbr)
 		{
-			philo = d->philo[i];
 			current_time = ft_get_time(MILLISECOND);
-			last_meal = ft_get_long(&philo.mutex, &philo.last_meal_time);
-			if (ft_fed_or_dead(d, philo, current_time - last_meal) < 0)
+			last_meal = ft_get_long(&d->philo[i].mutex, &d->philo[i].last_meal_time);
+			if (ft_fed_or_dead(d, d->philo[i], current_time - last_meal) < 0)
 				return (NULL);
 		}
 		usleep(1000);
