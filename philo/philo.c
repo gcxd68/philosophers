@@ -61,20 +61,6 @@ static int	ft_parse_input(t_data *data, char *argv[])
 	return (0);
 }
 
-static void	ft_assign_forks(t_philo *philo, t_fork *fork)
-{
-	if (philo->id % 2)
-	{
-		philo->left_fork = &fork[(philo->id + 1) % philo->data->philo_nbr];
-		philo->right_fork = &fork[philo->id];
-	}
-	else
-	{
-		philo->right_fork = &fork[philo->id];
-		philo->left_fork = &fork[(philo->id + 1) % philo->data->philo_nbr];
-	}
-}
-
 static void	ft_init_data(t_data *data)
 {
 	int	i;
@@ -98,7 +84,9 @@ static void	ft_init_data(t_data *data)
 		data->philo[i].id = i;
 		data->philo[i].data = data;
 		pthread_mutex_init(&data->philo[i].mutex, NULL);
-		ft_assign_forks(&data->philo[i], data->fork);
+		data->philo[i].left_fork
+			= &data->fork[(data->philo[i].id + 1) % data->philo_nbr];
+		data->philo[i].right_fork = &data->fork[data->philo[i].id];
 	}
 }
 
@@ -108,7 +96,7 @@ int	main(int argc, char *argv[])
 
 	if (argc < 5 || argc > 6)
 	{
-		if (write (2, "Usage : ./philo number_of_philosophers "
+		if (write(2, "Usage : ./philo number_of_philosophers "
 				"time_to_die time_to_eat time_to_sleep "
 				"[number_of_times_each_philosopher_must_eat]\n", 121) < 0)
 		{

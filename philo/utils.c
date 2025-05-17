@@ -124,11 +124,12 @@ void	*ft_monitor(void *data)
 		while (++i < d->philo_nbr)
 		{
 			current_time = ft_get_time(MILLISECOND);
-			last_meal = ft_get_long(&d->philo[i].mutex, &d->philo[i].last_meal_time);
+			last_meal = ft_get_long(&d->philo[i].mutex,
+					&d->philo[i].last_meal_time);
 			if (ft_fed_or_dead(d, d->philo[i], current_time - last_meal) < 0)
 				return (NULL);
 		}
-		usleep(1000);
+		usleep(500);
 	}
 	return (NULL);
 }
