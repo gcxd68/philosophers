@@ -47,26 +47,27 @@ static void	ft_usleep(long sleep_time, t_data *data)
 
 static void	ft_eat(t_philo *philo)
 {
-	pthread_mutex_lock(&philo->left_fork->mutex);
-	ft_write_state(TAKING_LEFT_FORK, philo, DEBUG_MODE);
+	pthread_mutex_lock(&philo->first_fork->mutex);
+	ft_write_state(TAKING_FIRST_FORK, philo, DEBUG_MODE);
 	if (philo->data->philo_nbr == 1)
 		while (!ft_sim_is_over(philo->data))
 			usleep(100);
 	else
 	{
-		pthread_mutex_lock(&philo->right_fork->mutex);
-		ft_write_state(TAKING_RIGHT_FORK, philo, DEBUG_MODE);
-		ft_set_long(&philo->mutex, &philo->last_meal_time,
-			ft_get_time(MILLISECOND));
-		philo->meal_ct++;
+		pthread_mutex_lock(&philo->second_fork->mutex);
+		ft_write_state(TAKING_SECOND_FORK, philo, DEBUG_MODE);
 		ft_write_state(EATING, philo, DEBUG_MODE);
-		ft_usleep(philo->data->time_to_eat, philo->data);
+		pthread_mutex_lock(&philo->mutex);
+		philo->last_meal_time = ft_get_time(MILLISECOND);
+		philo->meal_ct++;
 		if (philo->data->max_meals > 0
 			&& philo->meal_ct == philo->data->max_meals)
-			ft_set_bool(&philo->mutex, &philo->is_full, true);
-		pthread_mutex_unlock(&philo->right_fork->mutex);
+			philo->is_full = true;
+		pthread_mutex_unlock(&philo->mutex);
+		ft_usleep(philo->data->time_to_eat, philo->data);
+		pthread_mutex_unlock(&philo->second_fork->mutex);
 	}
-	pthread_mutex_unlock(&philo->left_fork->mutex);
+	pthread_mutex_unlock(&philo->first_fork->mutex);
 }
 
 static void	*ft_dinner(void *data)
@@ -78,14 +79,13 @@ static void	*ft_dinner(void *data)
 	d = philo->data;
 	while (!ft_get_bool(&d->state_mutex, &d->all_threads_ready))
 		usleep(100);
-	ft_set_long(&philo->mutex, &philo->last_meal_time, d->start_time);
 	if (philo->id % 2 == 0)
 		usleep(1000);
 	while (!ft_sim_is_over(d))
 	{
-		if (philo->is_full)
-			break ;
 		ft_eat(philo);
+		if (ft_get_bool(&philo->mutex, &philo->is_full))
+			break ;
 		ft_write_state(SLEEPING, philo, DEBUG_MODE);
 		ft_usleep(d->time_to_sleep, d);
 		ft_write_state(THINKING, philo, DEBUG_MODE);

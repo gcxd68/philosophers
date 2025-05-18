@@ -65,13 +65,13 @@ static void	ft_assign_forks(t_philo *philo, t_fork *fork)
 {
 	if (philo->id % 2)
 	{
-		philo->left_fork = &fork[(philo->id + 1) % philo->data->philo_nbr];
-		philo->right_fork = &fork[philo->id];
+		philo->first_fork = &fork[(philo->id + 1) % philo->data->philo_nbr];
+		philo->second_fork = &fork[philo->id];
 	}
 	else
 	{
-		philo->right_fork = &fork[philo->id];
-		philo->left_fork = &fork[(philo->id + 1) % philo->data->philo_nbr];
+		philo->first_fork = &fork[philo->id];
+		philo->second_fork = &fork[(philo->id + 1) % philo->data->philo_nbr];
 	}
 }
 

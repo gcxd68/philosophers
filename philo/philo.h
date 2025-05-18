@@ -37,10 +37,10 @@ typedef struct s_philo
 {
 	int			id;
 	pthread_t	thread;
-	t_fork		*left_fork;
-	t_fork		*right_fork;
+	t_fork		*first_fork;
+	t_fork		*second_fork;
 	long		last_meal_time;
-	int			meal_ct;
+	long		meal_ct;
 	bool		is_full;
 	t_mutex		mutex;
 	t_data		*data;
@@ -64,8 +64,8 @@ struct s_data
 
 typedef enum e_philo_state
 {
-	TAKING_LEFT_FORK,
-	TAKING_RIGHT_FORK,
+	TAKING_FIRST_FORK,
+	TAKING_SECOND_FORK,
 	EATING,
 	SLEEPING,
 	THINKING,
