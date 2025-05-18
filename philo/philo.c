@@ -61,6 +61,20 @@ static int	ft_parse_input(t_data *data, char *argv[])
 	return (0);
 }
 
+static void	ft_assign_forks(t_philo *philo, t_fork *fork)
+{
+	if (philo->id % 2)
+	{
+		philo->left_fork = &fork[(philo->id + 1) % philo->data->philo_nbr];
+		philo->right_fork = &fork[philo->id];
+	}
+	else
+	{
+		philo->right_fork = &fork[philo->id];
+		philo->left_fork = &fork[(philo->id + 1) % philo->data->philo_nbr];
+	}
+}
+
 static void	ft_init_data(t_data *data)
 {
 	int	i;
@@ -84,9 +98,7 @@ static void	ft_init_data(t_data *data)
 		data->philo[i].id = i;
 		data->philo[i].data = data;
 		pthread_mutex_init(&data->philo[i].mutex, NULL);
-		data->philo[i].left_fork
-			= &data->fork[(data->philo[i].id + 1) % data->philo_nbr];
-		data->philo[i].right_fork = &data->fork[data->philo[i].id];
+		ft_assign_forks(&data->philo[i], data->fork);
 	}
 }
 
@@ -105,8 +117,16 @@ int	main(int argc, char *argv[])
 		}
 		return (2);
 	}
-	ft_parse_input(&data, argv);
+	if (ft_parse_input(&data, argv) < 0)
+	{
+		if (write(2, "philo: arguments must be positive integers\n", 43) < 0)
+		{
+			ft_error_exit("philo: write failed", PERROR);
+			return (EXIT_FAILURE);
+		}
+		return (2);
+	}
 	ft_init_data(&data);
 	ft_sim(&data);
-	return (0);
+	return (EXIT_SUCCESS);
 }

@@ -45,30 +45,28 @@ static void	ft_usleep(long sleep_time, t_data *data)
 	}
 }
 
-static void	ft_eat(t_philo *philo, t_fork *first_fork, t_fork *second_fork)
+static void	ft_eat(t_philo *philo)
 {
-	const bool	condition = (first_fork == philo->right_fork);
-
-	pthread_mutex_lock(&first_fork->mutex);
-	ft_write_state((t_ps)condition, philo, DEBUG_MODE);
+	pthread_mutex_lock(&philo->left_fork->mutex);
+	ft_write_state(TAKING_LEFT_FORK, philo, DEBUG_MODE);
 	if (philo->data->philo_nbr == 1)
 		while (!ft_sim_is_over(philo->data))
 			usleep(100);
 	else
 	{
-		pthread_mutex_lock(&second_fork->mutex);
-		ft_write_state((t_ps)(!condition), philo, DEBUG_MODE);
-		ft_set_long(&philo->mutex,
-			&philo->last_meal_time, ft_get_time(MILLISECOND));
+		pthread_mutex_lock(&philo->right_fork->mutex);
+		ft_write_state(TAKING_RIGHT_FORK, philo, DEBUG_MODE);
+		ft_set_long(&philo->mutex, &philo->last_meal_time,
+			ft_get_time(MILLISECOND));
 		philo->meal_ct++;
 		ft_write_state(EATING, philo, DEBUG_MODE);
+		ft_usleep(philo->data->time_to_eat, philo->data);
 		if (philo->data->max_meals > 0
 			&& philo->meal_ct == philo->data->max_meals)
 			ft_set_bool(&philo->mutex, &philo->is_full, true);
-		ft_usleep(philo->data->time_to_eat, philo->data);
-		pthread_mutex_unlock(&second_fork->mutex);
+		pthread_mutex_unlock(&philo->right_fork->mutex);
 	}
-	pthread_mutex_unlock(&first_fork->mutex);
+	pthread_mutex_unlock(&philo->left_fork->mutex);
 }
 
 static void	*ft_dinner(void *data)
@@ -82,15 +80,12 @@ static void	*ft_dinner(void *data)
 		usleep(100);
 	ft_set_long(&philo->mutex, &philo->last_meal_time, d->start_time);
 	if (philo->id % 2 == 0)
-		usleep(100);
+		usleep(1000);
 	while (!ft_sim_is_over(d))
 	{
 		if (philo->is_full)
 			break ;
-		if (philo->left_fork->id < philo->right_fork->id)
-			ft_eat(philo, philo->left_fork, philo->right_fork);
-		else
-			ft_eat(philo, philo->right_fork, philo->left_fork);
+		ft_eat(philo);
 		ft_write_state(SLEEPING, philo, DEBUG_MODE);
 		ft_usleep(d->time_to_sleep, d);
 		ft_write_state(THINKING, philo, DEBUG_MODE);

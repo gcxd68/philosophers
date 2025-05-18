@@ -129,7 +129,7 @@ void	*ft_monitor(void *data)
 			if (ft_fed_or_dead(d, d->philo[i], current_time - last_meal) < 0)
 				return (NULL);
 		}
-		usleep(500);
+		usleep(1000);
 	}
 	return (NULL);
 }
