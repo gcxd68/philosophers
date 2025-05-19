@@ -12,36 +12,42 @@
 
 #include "philo.h"
 
-long	ft_get_time(t_tc time_code)
+long	ft_get_time(t_tc time_code, t_data *data)
 {
 	struct timeval	tv;
 
 	if (gettimeofday(&tv, NULL) < 0)
+	{
+		ft_cleanup_data(data);
 		ft_error_exit("philo: gettimeofday failed", PERROR);
+	}
 	else if (time_code == MILLISECOND)
 		return ((tv.tv_sec * 1e3) + tv.tv_usec / 1e3);
 	else if (time_code == MICROSECOND)
 		return ((tv.tv_sec * 1e6) + tv.tv_usec);
 	else
+	{
+		ft_cleanup_data(data);
 		ft_error_exit("philo: wrong input to gettime", WRITE);
+	}
 	return (0);
 }
 
 static void	ft_usleep(long sleep_time, t_data *data)
 {
-	const long	start_time = ft_get_time(MICROSECOND);
+	const long	start_time = ft_get_time(MICROSECOND, data);
 	const long	end_time = start_time + sleep_time;
 	long		current_time;
 
 	while (!ft_sim_is_over(data))
 	{
-		current_time = ft_get_time(MICROSECOND);
+		current_time = ft_get_time(MICROSECOND, data);
 		if (current_time >= end_time)
 			break ;
 		if (end_time - current_time < 1000)
 			continue ;
 		else
-			usleep((end_time - current_time) / 2);
+			usleep((end_time - current_time) * 3 / 5);
 	}
 }
 
@@ -58,7 +64,7 @@ static void	ft_eat(t_philo *philo)
 		ft_write_state(TAKING_SECOND_FORK, philo, DEBUG_MODE);
 		ft_write_state(EATING, philo, DEBUG_MODE);
 		pthread_mutex_lock(&philo->mutex);
-		philo->last_meal_time = ft_get_time(MILLISECOND);
+		philo->last_meal_time = ft_get_time(MILLISECOND, philo->data);
 		philo->meal_ct++;
 		if (philo->data->max_meals > 0
 			&& philo->meal_ct == philo->data->max_meals)
@@ -80,7 +86,7 @@ static void	*ft_dinner(void *data)
 	while (!ft_get_bool(&d->state_mutex, &d->all_threads_ready))
 		usleep(100);
 	if (philo->id % 2 == 0)
-		usleep(1000);
+		usleep(500);
 	while (!ft_sim_is_over(d))
 	{
 		ft_eat(philo);
@@ -102,7 +108,7 @@ void	ft_sim(t_data *data)
 		return ;
 	else
 	{
-		data->start_time = ft_get_time(MILLISECOND);
+		data->start_time = ft_get_time(MILLISECOND, data);
 		i = -1;
 		while (++i < data->philo_nbr)
 			ft_set_long(&data->philo[i].mutex, &data->philo[i].last_meal_time,

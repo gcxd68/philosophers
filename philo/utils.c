@@ -12,6 +12,22 @@
 
 #include "philo.h"
 
+void	ft_cleanup_data(t_data *data)
+{
+	int	i;
+
+	i = -1;
+	while (++i < data->philo_nbr)
+	{
+		pthread_mutex_destroy(&data->philo[i].mutex);
+		pthread_mutex_destroy(&data->fork[i].mutex);
+	}
+	pthread_mutex_destroy(&data->state_mutex);
+	pthread_mutex_destroy(&data->write_mutex);
+	free(data->fork);
+	free(data->philo);
+}
+
 void	ft_error_exit(const char *err_msg, t_om output_mode)
 {
 	size_t	err_msg_len;
@@ -59,25 +75,24 @@ void	ft_write_state(t_ps state, t_philo *philo, bool debug)
 {
 	long	elapsed_time;
 
-	elapsed_time = ft_get_time(MILLISECOND) - philo->data->start_time;
-	if (ft_get_bool(&philo->mutex, &philo->is_full))
-		return ;
 	pthread_mutex_lock(&philo->data->write_mutex);
+	elapsed_time
+		= ft_get_time(MILLISECOND, philo->data) - philo->data->start_time;
 	if (debug)
 		ft_write_state_debug(state, philo, elapsed_time);
 	else
 	{
 		if ((state == TAKING_FIRST_FORK || state == TAKING_SECOND_FORK)
 			&& !ft_sim_is_over(philo->data))
-			printf("%6ld %d has taken a fork\n", elapsed_time, philo->id + 1);
+			printf("%ld %d has taken a fork\n", elapsed_time, philo->id + 1);
 		else if (state == EATING && !ft_sim_is_over(philo->data))
-			printf("%6ld %d is eating\n", elapsed_time, philo->id + 1);
+			printf("%ld %d is eating\n", elapsed_time, philo->id + 1);
 		else if (state == SLEEPING && !ft_sim_is_over(philo->data))
-			printf("%6ld %d is sleeping\n", elapsed_time, philo->id + 1);
+			printf("%ld %d is sleeping\n", elapsed_time, philo->id + 1);
 		else if (state == THINKING && !ft_sim_is_over(philo->data))
-			printf("%6ld %d is thinking\n", elapsed_time, philo->id + 1);
+			printf("%ld %d is thinking\n", elapsed_time, philo->id + 1);
 		else if (state == DIED)
-			printf("%6ld %d died\n", elapsed_time, philo->id + 1);
+			printf("%ld %d died\n", elapsed_time, philo->id + 1);
 	}
 	pthread_mutex_unlock(&philo->data->write_mutex);
 }
@@ -87,7 +102,8 @@ static int	ft_fed_or_dead(t_data *d, t_philo *philo, long time_since_last_meal)
 	bool	all_full;
 	int		i;
 
-	if (time_since_last_meal > d->time_to_die / 1e3)
+	if (time_since_last_meal > d->time_to_die / 1e3
+		&& !ft_get_bool(&philo->mutex, &philo->is_full))
 	{
 		ft_set_bool(&d->state_mutex, &d->end_sim, true);
 		ft_write_state(DIED, philo, DEBUG_MODE);
@@ -119,13 +135,12 @@ void	*ft_monitor(void *data)
 	d = (t_data *)data;
 	while (!ft_get_bool(&d->state_mutex, &d->all_threads_ready))
 		usleep(100);
-	usleep(1000);
 	while (!ft_sim_is_over(d))
 	{
 		i = -1;
 		while (++i < d->philo_nbr)
 		{
-			current_time = ft_get_time(MILLISECOND);
+			current_time = ft_get_time(MILLISECOND, data);
 			last_meal = ft_get_long(&d->philo[i].mutex,
 					&d->philo[i].last_meal_time);
 			if (ft_fed_or_dead(d, &d->philo[i], current_time - last_meal) < 0)

@@ -95,8 +95,10 @@ static void	ft_init_data(t_data *data)
 	{
 		pthread_mutex_init(&data->fork[i].mutex, NULL);
 		data->fork[i].id = i;
-		data->philo[i].id = i;
-		data->philo[i].data = data;
+		data->philo[i] = (t_philo){
+			.id = i,
+			.data = data
+		};
 		pthread_mutex_init(&data->philo[i].mutex, NULL);
 		ft_assign_forks(&data->philo[i], data->fork);
 	}
@@ -111,22 +113,17 @@ int	main(int argc, char *argv[])
 		if (write(2, "Usage : ./philo number_of_philosophers "
 				"time_to_die time_to_eat time_to_sleep "
 				"[number_of_times_each_philosopher_must_eat]\n", 121) < 0)
-		{
 			ft_error_exit("philo: write failed", PERROR);
-			return (EXIT_FAILURE);
-		}
 		return (2);
 	}
 	if (ft_parse_input(&data, argv) < 0)
 	{
 		if (write(2, "philo: arguments must be positive integers\n", 43) < 0)
-		{
 			ft_error_exit("philo: write failed", PERROR);
-			return (EXIT_FAILURE);
-		}
 		return (2);
 	}
 	ft_init_data(&data);
 	ft_sim(&data);
+	ft_cleanup_data(&data);
 	return (EXIT_SUCCESS);
 }

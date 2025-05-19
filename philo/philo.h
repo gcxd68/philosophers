@@ -21,7 +21,7 @@
 # include <unistd.h>
 # include <sys/time.h>
 
-# define DEBUG_MODE 0
+# define DEBUG_MODE 1
 
 typedef pthread_mutex_t	t_mutex;
 
@@ -84,10 +84,11 @@ typedef enum e_output_mode
 	PERROR
 }	t_om;
 
+void	ft_cleanup_data(t_data *data);
 void	ft_error_exit(const char *err_msg, t_om output_mode);
 
 void	ft_sim(t_data *data);
-long	ft_get_time(t_tc time_code);
+long	ft_get_time(t_tc time_code, t_data *data);
 void	*ft_monitor(void *data);
 void	ft_write_state(t_ps state, t_philo *philo, bool debug);
 
