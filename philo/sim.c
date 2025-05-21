@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sim.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gdosch <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 11:25:17 by gdosch            #+#    #+#             */
-/*   Updated: 2025/03/09 11:25:19 by gdosch           ###   ########.fr       */
+/*   Updated: 2025/05/20 19:15:20 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,19 +17,13 @@ long	ft_get_time(t_tc time_code, t_data *data)
 	struct timeval	tv;
 
 	if (gettimeofday(&tv, NULL) < 0)
-	{
-		ft_cleanup_data(data);
-		ft_error_exit("philo: gettimeofday failed", PERROR);
-	}
+		ft_error_exit("philo: gettimeofday failed", 1, PERROR, data);
 	else if (time_code == MILLISECOND)
 		return ((tv.tv_sec * 1e3) + tv.tv_usec / 1e3);
 	else if (time_code == MICROSECOND)
 		return ((tv.tv_sec * 1e6) + tv.tv_usec);
 	else
-	{
-		ft_cleanup_data(data);
-		ft_error_exit("philo: wrong input to gettime", WRITE);
-	}
+		ft_error_exit("philo: wrong input to gettime", 1, WRITE, data);
 	return (0);
 }
 

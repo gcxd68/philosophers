@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gdosch <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 13:34:45 by gdosch            #+#    #+#             */
-/*   Updated: 2025/03/06 13:34:46 by gdosch           ###   ########.fr       */
+/*   Updated: 2025/05/21 17:25:07 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ static long	ft_atol_p(const char *nptr)
 	return ((long)res);
 }
 
-static int	ft_parse_input(t_data *data, char *argv[])
+static void	ft_parse_input(t_data *data, char *argv[])
 {
 	*data = (t_data){
 		.philo_nbr = ft_atol_p(argv[1]),
@@ -43,22 +43,19 @@ static int	ft_parse_input(t_data *data, char *argv[])
 		.time_to_eat = ft_atol_p(argv[3]) * 1e3,
 		.time_to_sleep = ft_atol_p(argv[4]) * 1e3
 	};
-	if (data->philo_nbr < 0 || data->time_to_die < 0
-		|| data->time_to_eat < 0 || data->time_to_sleep < 0)
-		return (-1);
 	if (argv[5])
-	{
 		data->max_meals = ft_atol_p(argv[5]);
-		if (data->max_meals < 0)
-			return (-1);
-	}
-	else
+	if (data->philo_nbr < 0 || data->time_to_die < 0 || data->time_to_eat < 0
+		|| data->time_to_sleep < 0 || data->max_meals < 0)
+		ft_error_exit("philo: arguments cannot be negative integers\n", 2, WRITE, data);
+	if (!argv[5])
 		data->max_meals = -1;
-	if (data->time_to_die < 6e4
-		|| data->time_to_eat < 6e4
-		|| data->time_to_sleep < 6e4)
-		return (-1);
-	return (0);
+//	if (data->time_to_die < 6e4
+//		|| data->time_to_eat < 6e4
+//		|| data->time_to_sleep < 6e4)
+//		ft_error_exit(???);
+	if (data->philo_nbr == 0 || data->max_meals == 0)
+		ft_error_exit(NULL, 0, NO_PRINT, data);
 }
 
 static void	ft_assign_forks(t_philo *philo, t_fork *fork)
@@ -81,13 +78,10 @@ static void	ft_init_data(t_data *data)
 
 	data->fork = malloc(sizeof(t_fork) * data->philo_nbr);
 	if (!data->fork)
-		ft_error_exit("philo: malloc failed", PERROR);
+		ft_error_exit("philo: malloc failed", 1, PERROR, data);
 	data->philo = malloc(sizeof(t_philo) * data->philo_nbr);
 	if (!data->philo)
-	{
-		free(data->fork);
-		ft_error_exit("philo: malloc failed", PERROR);
-	}
+		ft_error_exit("philo: malloc failed", 1, PERROR, data);
 	pthread_mutex_init(&data->state_mutex, NULL);
 	pthread_mutex_init(&data->write_mutex, NULL);
 	i = -1;
@@ -95,13 +89,11 @@ static void	ft_init_data(t_data *data)
 	{
 		pthread_mutex_init(&data->fork[i].mutex, NULL);
 		data->fork[i].id = i;
-		data->philo[i] = (t_philo){
-			.id = i,
-			.data = data
-		};
+		data->philo[i] = (t_philo){.id = i, .data = data};
 		pthread_mutex_init(&data->philo[i].mutex, NULL);
 		ft_assign_forks(&data->philo[i], data->fork);
 	}
+	data->mutex_init = true;
 }
 
 int	main(int argc, char *argv[])
@@ -109,19 +101,8 @@ int	main(int argc, char *argv[])
 	t_data	data;
 
 	if (argc < 5 || argc > 6)
-	{
-		if (write(2, "Usage : ./philo number_of_philosophers "
-				"time_to_die time_to_eat time_to_sleep "
-				"[number_of_times_each_philosopher_must_eat]\n", 121) < 0)
-			ft_error_exit("philo: write failed", PERROR);
-		return (2);
-	}
-	if (ft_parse_input(&data, argv) < 0)
-	{
-		if (write(2, "philo: arguments must be positive integers\n", 43) < 0)
-			ft_error_exit("philo: write failed", PERROR);
-		return (2);
-	}
+		ft_error_exit("Usage : ./philo number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_times_each_philosopher_must_eat]\n", 2, WRITE, &data);
+	ft_parse_input(&data, argv);
 	ft_init_data(&data);
 	ft_sim(&data);
 	ft_cleanup_data(&data);

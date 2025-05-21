@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gdosch <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 13:34:54 by gdosch            #+#    #+#             */
-/*   Updated: 2025/03/06 13:34:56 by gdosch           ###   ########.fr       */
+/*   Updated: 2025/05/21 20:15:27 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # include <unistd.h>
 # include <sys/time.h>
 
-# define DEBUG_MODE 1
+# define DEBUG_MODE 0
 
 typedef pthread_mutex_t	t_mutex;
 
@@ -56,6 +56,7 @@ struct s_data
 	long	start_time;
 	bool	end_sim;
 	bool	all_threads_ready;
+	bool	mutex_init;
 	t_mutex	state_mutex;
 	t_mutex	write_mutex;
 	t_fork	*fork;
@@ -80,12 +81,13 @@ typedef enum e_time_code
 
 typedef enum e_output_mode
 {
+	NO_PRINT,
 	WRITE,
 	PERROR
 }	t_om;
 
 void	ft_cleanup_data(t_data *data);
-void	ft_error_exit(const char *err_msg, t_om output_mode);
+void	ft_error_exit(const char *err_msg, int error_code, t_om output_mode, t_data *data);
 
 void	ft_sim(t_data *data);
 long	ft_get_time(t_tc time_code, t_data *data);

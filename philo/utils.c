@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gdosch <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 12:48:14 by gdosch            #+#    #+#             */
-/*   Updated: 2025/03/09 12:48:15 by gdosch           ###   ########.fr       */
+/*   Updated: 2025/05/20 19:15:22 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,22 +16,30 @@ void	ft_cleanup_data(t_data *data)
 {
 	int	i;
 
-	i = -1;
-	while (++i < data->philo_nbr)
+	if (!data)
+		return ;
+	if (data->mutex_init)
 	{
-		pthread_mutex_destroy(&data->philo[i].mutex);
-		pthread_mutex_destroy(&data->fork[i].mutex);
+		i = -1;
+		while (++i < data->philo_nbr)
+		{
+			pthread_mutex_destroy(&data->philo[i].mutex);
+			pthread_mutex_destroy(&data->fork[i].mutex);
+		}
+		pthread_mutex_destroy(&data->state_mutex);
+		pthread_mutex_destroy(&data->write_mutex);
 	}
-	pthread_mutex_destroy(&data->state_mutex);
-	pthread_mutex_destroy(&data->write_mutex);
-	free(data->fork);
-	free(data->philo);
+	if (data->fork)
+		free(data->fork);
+	if (data->philo)
+		free(data->philo);
 }
 
-void	ft_error_exit(const char *err_msg, t_om output_mode)
+void	ft_error_exit(const char *err_msg, int error_code, t_om output_mode, t_data *data)
 {
 	size_t	err_msg_len;
 
+	ft_cleanup_data(data);
 	if (output_mode == PERROR)
 		perror(err_msg);
 	else if (output_mode == WRITE)
@@ -40,9 +48,9 @@ void	ft_error_exit(const char *err_msg, t_om output_mode)
 		while (err_msg[err_msg_len])
 			err_msg_len++;
 		if (write (2, err_msg, err_msg_len) < 0)
-			ft_error_exit("philo: write failed", PERROR);
+			perror("philo: write failed");
 	}
-	exit(EXIT_FAILURE);
+	exit(error_code);
 }
 
 static void	ft_write_state_debug(t_ps state, t_philo *philo, long elapsed_time)
