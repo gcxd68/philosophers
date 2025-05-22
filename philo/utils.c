@@ -44,8 +44,7 @@ void	ft_write_state(t_ps state, t_philo *philo)
 	long	elapsed_time;
 
 	pthread_mutex_lock(&philo->data->write_mutex);
-	elapsed_time
-		= ft_get_time(MILLISECOND, philo->data) - philo->data->start_time;
+	elapsed_time = ft_get_time(MILLISECOND) - philo->data->start_time;
 	if (DEBUG_MODE)
 		ft_write_state_debug(state, philo, elapsed_time);
 	else
@@ -71,8 +70,7 @@ void	ft_write_state(t_ps state, t_philo *philo)
 	long	elapsed_time;
 
 	pthread_mutex_lock(&philo->data->write_mutex);
-	elapsed_time
-		= ft_get_time(MILLISECOND, philo->data) - philo->data->start_time;
+	elapsed_time = ft_get_time(MILLISECOND) - philo->data->start_time;
 	if ((state == TAKING_FIRST_FORK || state == TAKING_SECOND_FORK)
 		&& !ft_sim_is_over(philo->data))
 		printf("%ld %d has taken a fork\n", elapsed_time, philo->id + 1);
@@ -87,12 +85,12 @@ void	ft_write_state(t_ps state, t_philo *philo)
 	pthread_mutex_unlock(&philo->data->write_mutex);
 }
 
-void	ft_cleanup_data(t_data *data)
+int	ft_cleanup(t_data *data, int error_code)
 {
 	int	i;
 
 	if (!data)
-		return ;
+		return (0);
 	if (data->mutex_init)
 	{
 		i = -1;
@@ -108,14 +106,13 @@ void	ft_cleanup_data(t_data *data)
 		free(data->fork);
 	if (data->philo)
 		free(data->philo);
+	return (error_code);
 }
 
-void	ft_error_exit(const char *err_msg,
-								int error_code, t_om output_mode, t_data *data)
+int	ft_error(const char *err_msg, t_om output_mode, int error_code)
 {
 	size_t	err_msg_len;
 
-	ft_cleanup_data(data);
 	if (output_mode == PERROR)
 		perror(err_msg);
 	else if (output_mode == WRITE)
@@ -126,7 +123,7 @@ void	ft_error_exit(const char *err_msg,
 		if (write (2, err_msg, err_msg_len) < 0)
 			perror("philo: write failed");
 	}
-	exit(error_code);
+	return (error_code);
 }
 
 static int	ft_fed_or_dead(t_data *d, t_philo *philo, long time_since_last_meal)
@@ -172,7 +169,7 @@ void	*ft_monitor(void *data)
 		i = -1;
 		while (++i < d->philo_nbr)
 		{
-			current_time = ft_get_time(MILLISECOND, data);
+			current_time = ft_get_time(MILLISECOND);
 			last_meal = ft_get_long(&d->philo[i].mutex,
 					&d->philo[i].last_meal_time);
 			if (ft_fed_or_dead(d, &d->philo[i], current_time - last_meal) < 0)

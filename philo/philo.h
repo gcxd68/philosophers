@@ -85,12 +85,11 @@ typedef enum e_output_mode
 	PERROR
 }	t_om;
 
-void	ft_cleanup_data(t_data *data);
-void	ft_error_exit(const char *err_msg,
-			int error_code, t_om output_mode, t_data *data);
+int		ft_cleanup(t_data *data, int error_code);
+int		ft_error(const char *err_msg, t_om output_mode, int error_code);
 
-void	ft_sim(t_data *data);
-long	ft_get_time(t_tc time_code, t_data *data);
+int		ft_sim(t_data *data);
+long	ft_get_time(t_tc time_code);
 void	*ft_monitor(void *data);
 void	ft_write_state(t_ps state, t_philo *philo);
 

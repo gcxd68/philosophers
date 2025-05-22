@@ -12,12 +12,12 @@
 
 #include "philo.h"
 
-long	ft_get_time(t_tc time_code, t_data *data)
+long	ft_get_time(t_tc time_code)
 {
 	struct timeval	tv;
 
 	if (gettimeofday(&tv, NULL) < 0)
-		ft_error_exit("philo: gettimeofday failed", 1, PERROR, data);
+		return (ft_error("philo: gettimeofday failed", PERROR, -1));
 	else if (time_code == MILLISECOND)
 		return ((tv.tv_sec * 1e3) + tv.tv_usec / 1e3);
 	else if (time_code == MICROSECOND)
@@ -27,14 +27,16 @@ long	ft_get_time(t_tc time_code, t_data *data)
 
 static void	ft_usleep(long sleep_time, t_data *data)
 {
-	const long	start_time = ft_get_time(MICROSECOND, data);
+	const long	start_time = ft_get_time(MICROSECOND);
 	const long	end_time = start_time + sleep_time;
 	long		current_time;
 
+	if (start_time < 0)
+		return ;
 	while (!ft_sim_is_over(data))
 	{
-		current_time = ft_get_time(MICROSECOND, data);
-		if (current_time >= end_time)
+		current_time = ft_get_time(MICROSECOND);
+		if (current_time < 0 || current_time >= end_time)
 			break ;
 		if (end_time - current_time > 1000)
 			usleep((end_time - current_time) * 3 / 4);
@@ -54,7 +56,7 @@ static void	ft_eat(t_philo *philo)
 		ft_write_state(TAKING_SECOND_FORK, philo);
 		ft_write_state(EATING, philo);
 		pthread_mutex_lock(&philo->mutex);
-		philo->last_meal_time = ft_get_time(MILLISECOND, philo->data);
+		philo->last_meal_time = ft_get_time(MILLISECOND);
 		philo->meal_ct++;
 		if (philo->data->max_meals > 0
 			&& philo->meal_ct == philo->data->max_meals)
@@ -89,29 +91,42 @@ static void	*ft_dinner(void *data)
 	return (NULL);
 }
 
-void	ft_sim(t_data *data)
+int	ft_sim(t_data *data)
 {
 	pthread_t	monitor;
 	int			i;
 
-	if (!data->max_meals)
-		return ;
+	data->start_time = ft_get_time(MILLISECOND);
+	if (data->start_time < 0)
+		return (-1);
+	i = -1;
+	while (++i < data->philo_nbr)
+		ft_set_long(&data->philo[i].mutex, &data->philo[i].last_meal_time,
+			data->start_time);
+	i = -1;
+	while (++i < data->philo_nbr)
+	{
+		if (pthread_create(&data->philo[i].thread, NULL, ft_dinner,
+				&data->philo[i]) != 0)
+		{
+			ft_error("philo: pthread_create failed", PERROR, 0);
+			ft_set_bool(&data->state_mutex, &data->end_sim, true);
+			break ;
+		}
+	}
+	if (pthread_create(&monitor, NULL, ft_monitor, data))
+	{
+		ft_error("philo: pthread_create failed", PERROR, 0);
+		ft_set_bool(&data->state_mutex, &data->end_sim, true);
+	}
 	else
 	{
-		data->start_time = ft_get_time(MILLISECOND, data);
-		i = -1;
-		while (++i < data->philo_nbr)
-			ft_set_long(&data->philo[i].mutex, &data->philo[i].last_meal_time,
-				data->start_time);
-		i = -1;
-		while (++i < data->philo_nbr)
-			pthread_create(&data->philo[i].thread, NULL, ft_dinner,
-				&data->philo[i]);
-		pthread_create(&monitor, NULL, ft_monitor, data);
 		ft_set_bool(&data->state_mutex, &data->all_threads_ready, true);
 		pthread_join(monitor, NULL);
-		i = -1;
-		while (++i < data->philo_nbr)
-			pthread_join(data->philo[i].thread, NULL);
 	}
+	i = -1;
+	while (++i < data->philo_nbr)
+		if (data->philo[i].thread)
+			pthread_join(data->philo[i].thread, NULL);
+	return (0);
 }
