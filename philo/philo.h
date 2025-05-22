@@ -48,19 +48,19 @@ typedef struct s_philo
 
 struct s_data
 {
-	long	philo_nbr;
-	long	time_to_die;
-	long	time_to_eat;
-	long	time_to_sleep;
-	long	max_meals;
-	long	start_time;
-	bool	end_sim;
-	bool	all_threads_ready;
-	bool	mutex_init;
-	t_mutex	state_mutex;
-	t_mutex	write_mutex;
-	t_fork	*fork;
-	t_philo	*philo;
+	long		philo_nbr;
+	long		time_to_die;
+	long		time_to_eat;
+	long		time_to_sleep;
+	long		max_meals;
+	long		start_time;
+	bool		end_sim;
+	bool		all_threads_ready;
+	bool		mutex_init;
+	t_mutex		state_mutex;
+	t_mutex		write_mutex;
+	t_fork		*fork;
+	t_philo		*philo;
 };
 
 typedef enum e_philo_state
@@ -81,18 +81,18 @@ typedef enum e_time_code
 
 typedef enum e_output_mode
 {
-	NO_PRINT,
 	WRITE,
 	PERROR
 }	t_om;
 
 void	ft_cleanup_data(t_data *data);
-void	ft_error_exit(const char *err_msg, int error_code, t_om output_mode, t_data *data);
+void	ft_error_exit(const char *err_msg,
+			int error_code, t_om output_mode, t_data *data);
 
 void	ft_sim(t_data *data);
 long	ft_get_time(t_tc time_code, t_data *data);
 void	*ft_monitor(void *data);
-void	ft_write_state(t_ps state, t_philo *philo, bool debug);
+void	ft_write_state(t_ps state, t_philo *philo);
 
 void	ft_set_bool(t_mutex *mutex, bool *dest, bool value);
 bool	ft_get_bool(t_mutex *mutex, bool *value);

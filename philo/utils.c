@@ -12,47 +12,7 @@
 
 #include "philo.h"
 
-void	ft_cleanup_data(t_data *data)
-{
-	int	i;
-
-	if (!data)
-		return ;
-	if (data->mutex_init)
-	{
-		i = -1;
-		while (++i < data->philo_nbr)
-		{
-			pthread_mutex_destroy(&data->philo[i].mutex);
-			pthread_mutex_destroy(&data->fork[i].mutex);
-		}
-		pthread_mutex_destroy(&data->state_mutex);
-		pthread_mutex_destroy(&data->write_mutex);
-	}
-	if (data->fork)
-		free(data->fork);
-	if (data->philo)
-		free(data->philo);
-}
-
-void	ft_error_exit(const char *err_msg, int error_code, t_om output_mode, t_data *data)
-{
-	size_t	err_msg_len;
-
-	ft_cleanup_data(data);
-	if (output_mode == PERROR)
-		perror(err_msg);
-	else if (output_mode == WRITE)
-	{
-		err_msg_len = 0;
-		while (err_msg[err_msg_len])
-			err_msg_len++;
-		if (write (2, err_msg, err_msg_len) < 0)
-			perror("philo: write failed");
-	}
-	exit(error_code);
-}
-
+/*
 static void	ft_write_state_debug(t_ps state, t_philo *philo, long elapsed_time)
 {
 	int	meal_ct;
@@ -79,14 +39,14 @@ static void	ft_write_state_debug(t_ps state, t_philo *philo, long elapsed_time)
 			philo->id);
 }
 
-void	ft_write_state(t_ps state, t_philo *philo, bool debug)
+void	ft_write_state(t_ps state, t_philo *philo)
 {
 	long	elapsed_time;
 
 	pthread_mutex_lock(&philo->data->write_mutex);
 	elapsed_time
 		= ft_get_time(MILLISECOND, philo->data) - philo->data->start_time;
-	if (debug)
+	if (DEBUG_MODE)
 		ft_write_state_debug(state, philo, elapsed_time);
 	else
 	{
@@ -104,6 +64,70 @@ void	ft_write_state(t_ps state, t_philo *philo, bool debug)
 	}
 	pthread_mutex_unlock(&philo->data->write_mutex);
 }
+*/
+
+void	ft_write_state(t_ps state, t_philo *philo)
+{
+	long	elapsed_time;
+
+	pthread_mutex_lock(&philo->data->write_mutex);
+	elapsed_time
+		= ft_get_time(MILLISECOND, philo->data) - philo->data->start_time;
+	if ((state == TAKING_FIRST_FORK || state == TAKING_SECOND_FORK)
+		&& !ft_sim_is_over(philo->data))
+		printf("%ld %d has taken a fork\n", elapsed_time, philo->id + 1);
+	else if (state == EATING && !ft_sim_is_over(philo->data))
+		printf("%ld %d is eating\n", elapsed_time, philo->id + 1);
+	else if (state == SLEEPING && !ft_sim_is_over(philo->data))
+		printf("%ld %d is sleeping\n", elapsed_time, philo->id + 1);
+	else if (state == THINKING && !ft_sim_is_over(philo->data))
+		printf("%ld %d is thinking\n", elapsed_time, philo->id + 1);
+	else if (state == DIED)
+		printf("%ld %d died\n", elapsed_time, philo->id + 1);
+	pthread_mutex_unlock(&philo->data->write_mutex);
+}
+
+void	ft_cleanup_data(t_data *data)
+{
+	int	i;
+
+	if (!data)
+		return ;
+	if (data->mutex_init)
+	{
+		i = -1;
+		while (++i < data->philo_nbr)
+		{
+			pthread_mutex_destroy(&data->philo[i].mutex);
+			pthread_mutex_destroy(&data->fork[i].mutex);
+		}
+		pthread_mutex_destroy(&data->state_mutex);
+		pthread_mutex_destroy(&data->write_mutex);
+	}
+	if (data->fork)
+		free(data->fork);
+	if (data->philo)
+		free(data->philo);
+}
+
+void	ft_error_exit(const char *err_msg,
+								int error_code, t_om output_mode, t_data *data)
+{
+	size_t	err_msg_len;
+
+	ft_cleanup_data(data);
+	if (output_mode == PERROR)
+		perror(err_msg);
+	else if (output_mode == WRITE)
+	{
+		err_msg_len = 0;
+		while (err_msg[err_msg_len])
+			err_msg_len++;
+		if (write (2, err_msg, err_msg_len) < 0)
+			perror("philo: write failed");
+	}
+	exit(error_code);
+}
 
 static int	ft_fed_or_dead(t_data *d, t_philo *philo, long time_since_last_meal)
 {
@@ -114,7 +138,7 @@ static int	ft_fed_or_dead(t_data *d, t_philo *philo, long time_since_last_meal)
 		&& !ft_get_bool(&philo->mutex, &philo->is_full))
 	{
 		ft_set_bool(&d->state_mutex, &d->end_sim, true);
-		ft_write_state(DIED, philo, DEBUG_MODE);
+		ft_write_state(DIED, philo);
 		return (-1);
 	}
 	if (d->max_meals > 0)

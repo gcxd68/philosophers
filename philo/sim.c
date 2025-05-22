@@ -22,8 +22,6 @@ long	ft_get_time(t_tc time_code, t_data *data)
 		return ((tv.tv_sec * 1e3) + tv.tv_usec / 1e3);
 	else if (time_code == MICROSECOND)
 		return ((tv.tv_sec * 1e6) + tv.tv_usec);
-	else
-		ft_error_exit("philo: wrong input to gettime", 1, WRITE, data);
 	return (0);
 }
 
@@ -38,25 +36,23 @@ static void	ft_usleep(long sleep_time, t_data *data)
 		current_time = ft_get_time(MICROSECOND, data);
 		if (current_time >= end_time)
 			break ;
-		if (end_time - current_time < 1000)
-			continue ;
-		else
-			usleep((end_time - current_time) * 3 / 5);
+		if (end_time - current_time > 1000)
+			usleep((end_time - current_time) * 3 / 4);
 	}
 }
 
 static void	ft_eat(t_philo *philo)
 {
 	pthread_mutex_lock(&philo->first_fork->mutex);
-	ft_write_state(TAKING_FIRST_FORK, philo, DEBUG_MODE);
+	ft_write_state(TAKING_FIRST_FORK, philo);
 	if (philo->data->philo_nbr == 1)
 		while (!ft_sim_is_over(philo->data))
 			usleep(100);
 	else
 	{
 		pthread_mutex_lock(&philo->second_fork->mutex);
-		ft_write_state(TAKING_SECOND_FORK, philo, DEBUG_MODE);
-		ft_write_state(EATING, philo, DEBUG_MODE);
+		ft_write_state(TAKING_SECOND_FORK, philo);
+		ft_write_state(EATING, philo);
 		pthread_mutex_lock(&philo->mutex);
 		philo->last_meal_time = ft_get_time(MILLISECOND, philo->data);
 		philo->meal_ct++;
@@ -86,9 +82,9 @@ static void	*ft_dinner(void *data)
 		ft_eat(philo);
 		if (ft_get_bool(&philo->mutex, &philo->is_full))
 			break ;
-		ft_write_state(SLEEPING, philo, DEBUG_MODE);
+		ft_write_state(SLEEPING, philo);
 		ft_usleep(d->time_to_sleep, d);
-		ft_write_state(THINKING, philo, DEBUG_MODE);
+		ft_write_state(THINKING, philo);
 	}
 	return (NULL);
 }

@@ -37,25 +37,21 @@ static long	ft_atol_p(const char *nptr)
 
 static void	ft_parse_input(t_data *data, char *argv[])
 {
-	*data = (t_data){
-		.philo_nbr = ft_atol_p(argv[1]),
-		.time_to_die = ft_atol_p(argv[2]) * 1e3,
-		.time_to_eat = ft_atol_p(argv[3]) * 1e3,
-		.time_to_sleep = ft_atol_p(argv[4]) * 1e3
-	};
+	data->philo_nbr = ft_atol_p(argv[1]);
+	data->time_to_die = ft_atol_p(argv[2]) * 1e3;
+	data->time_to_eat = ft_atol_p(argv[3]) * 1e3;
+	data->time_to_sleep = ft_atol_p(argv[4]) * 1e3;
 	if (argv[5])
 		data->max_meals = ft_atol_p(argv[5]);
 	if (data->philo_nbr < 0 || data->time_to_die < 0 || data->time_to_eat < 0
 		|| data->time_to_sleep < 0 || data->max_meals < 0)
-		ft_error_exit("philo: arguments cannot be negative integers\n", 2, WRITE, data);
+		ft_error_exit("philo: arguments cannot be negative integers\n",
+			2, WRITE, data);
 	if (!argv[5])
 		data->max_meals = -1;
-//	if (data->time_to_die < 6e4
-//		|| data->time_to_eat < 6e4
-//		|| data->time_to_sleep < 6e4)
-//		ft_error_exit(???);
 	if (data->philo_nbr == 0 || data->max_meals == 0)
-		ft_error_exit(NULL, 0, NO_PRINT, data);
+		ft_error_exit("philo: simulation cannot proceed with zero philosophers "
+			"or a maximum meal count of zero\n", 0, WRITE, data);
 }
 
 static void	ft_assign_forks(t_philo *philo, t_fork *fork)
@@ -100,8 +96,11 @@ int	main(int argc, char *argv[])
 {
 	t_data	data;
 
+	data = (t_data){0};
 	if (argc < 5 || argc > 6)
-		ft_error_exit("Usage : ./philo number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_times_each_philosopher_must_eat]\n", 2, WRITE, &data);
+		ft_error_exit("Usage : ./philo number_of_philosophers "
+			"time_to_die time_to_eat time_to_sleep "
+			"[number_of_times_each_philosopher_must_eat]\n", 2, WRITE, &data);
 	ft_parse_input(&data, argv);
 	ft_init_data(&data);
 	ft_sim(&data);
