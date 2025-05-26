@@ -6,13 +6,14 @@
 #    By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/05 11:47:52 by gdosch            #+#    #+#              #
-#    Updated: 2025/05/21 20:15:31 by gdosch           ###   ########.fr        #
+#    Updated: 2025/05/26 15:07:09 by gdosch           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 SRC =			philo.c \
 				getset.c \
 				sim.c \
+				monitor.c \
 				utils.c
 
 OBJ =			$(SRC:.c=.o)

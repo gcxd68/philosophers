@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 13:34:54 by gdosch            #+#    #+#             */
-/*   Updated: 2025/05/21 20:15:27 by gdosch           ###   ########.fr       */
+/*   Updated: 2025/05/26 15:52:56 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,11 +85,13 @@ typedef enum e_output_mode
 	PERROR
 }	t_om;
 
+void	ft_destroy_mutexes(int philo_nbr, t_data *data);
 int		ft_cleanup(t_data *data, int error_code);
 int		ft_error(const char *err_msg, t_om output_mode, int error_code);
+long	ft_get_time(t_tc time_code);
+long	ft_atol_p(const char *nptr);
 
 int		ft_sim(t_data *data);
-long	ft_get_time(t_tc time_code);
 void	*ft_monitor(void *data);
 void	ft_write_state(t_ps state, t_philo *philo);
 

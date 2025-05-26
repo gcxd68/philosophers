@@ -6,24 +6,11 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 11:25:17 by gdosch            #+#    #+#             */
-/*   Updated: 2025/05/20 19:15:20 by gdosch           ###   ########.fr       */
+/*   Updated: 2025/05/26 15:22:36 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-
-long	ft_get_time(t_tc time_code)
-{
-	struct timeval	tv;
-
-	if (gettimeofday(&tv, NULL) < 0)
-		return (ft_error("philo: gettimeofday failed", PERROR, -1));
-	else if (time_code == MILLISECOND)
-		return ((tv.tv_sec * 1e3) + tv.tv_usec / 1e3);
-	else if (time_code == MICROSECOND)
-		return ((tv.tv_sec * 1e6) + tv.tv_usec);
-	return (0);
-}
 
 static void	ft_usleep(long sleep_time, t_data *data)
 {
@@ -91,27 +78,19 @@ static void	*ft_dinner(void *data)
 	return (NULL);
 }
 
-int	ft_sim(t_data *data)
+static void	ft_start_threads(t_data *data)
 {
 	pthread_t	monitor;
 	int			i;
 
-	data->start_time = ft_get_time(MILLISECOND);
-	if (data->start_time < 0)
-		return (-1);
 	i = -1;
-	while (++i < data->philo_nbr)
-		ft_set_long(&data->philo[i].mutex, &data->philo[i].last_meal_time,
-			data->start_time);
-	i = -1;
-	while (++i < data->philo_nbr)
+	while (++i < data->philo_nbr && !ft_sim_is_over(data))
 	{
 		if (pthread_create(&data->philo[i].thread, NULL, ft_dinner,
-				&data->philo[i]) != 0)
+				&data->philo[i]))
 		{
 			ft_error("philo: pthread_create failed", PERROR, 0);
 			ft_set_bool(&data->state_mutex, &data->end_sim, true);
-			break ;
 		}
 	}
 	if (pthread_create(&monitor, NULL, ft_monitor, data))
@@ -124,6 +103,20 @@ int	ft_sim(t_data *data)
 		ft_set_bool(&data->state_mutex, &data->all_threads_ready, true);
 		pthread_join(monitor, NULL);
 	}
+}
+
+int	ft_sim(t_data *data)
+{
+	int	i;
+
+	data->start_time = ft_get_time(MILLISECOND);
+	if (data->start_time < 0)
+		return (-1);
+	i = -1;
+	while (++i < data->philo_nbr)
+		ft_set_long(&data->philo[i].mutex, &data->philo[i].last_meal_time,
+			data->start_time);
+	ft_start_threads(data);
 	i = -1;
 	while (++i < data->philo_nbr)
 		if (data->philo[i].thread)

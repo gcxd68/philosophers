@@ -6,34 +6,11 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 13:34:45 by gdosch            #+#    #+#             */
-/*   Updated: 2025/05/21 17:25:07 by gdosch           ###   ########.fr       */
+/*   Updated: 2025/05/26 15:56:21 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-
-static long	ft_atol_p(const char *nptr)
-{
-	unsigned long long	res;
-
-	res = 0;
-	while ((*nptr >= '\t' && *nptr <= '\r') || *nptr == ' ')
-		nptr++;
-	if (*nptr == '-')
-		return (-1);
-	if (*nptr == '+')
-		nptr++;
-	while (*nptr >= '0' && *nptr <= '9')
-	{
-		res = res * 10 + *nptr - '0';
-		if ((res > (unsigned long long)LONG_MAX))
-			return (-1);
-		nptr++;
-	}
-	if ((*nptr < '0' || *nptr > '9') && *nptr != '\0')
-		return (-1);
-	return ((long)res);
-}
 
 static int	ft_parse_input(t_data *data, char *argv[])
 {
@@ -69,30 +46,47 @@ static void	ft_assign_forks(t_philo *philo, t_fork *fork)
 	}
 }
 
-static int	ft_init_data(t_data *data)
+static int	ft_init_philos(t_data *data)
 {
 	int	i;
 
-	data->fork = malloc(sizeof(t_fork) * data->philo_nbr);
-	if (!data->fork)
-		return (ft_error("philo: malloc failed", PERROR, 1));
-	data->philo = malloc(sizeof(t_philo) * data->philo_nbr);
-	if (!data->philo)
-		return (ft_error("philo: malloc failed", PERROR, 1));
-	if (pthread_mutex_init(&data->state_mutex, NULL)
-		|| pthread_mutex_init(&data->write_mutex, NULL))
-		return (ft_error("philo: mutex init failed", PERROR, 1));
-	data->mutex_init = true;
 	i = -1;
 	while (++i < data->philo_nbr)
 	{
 		data->fork[i].id = i;
 		data->philo[i] = (t_philo){.id = i, .data = data};
-		if (pthread_mutex_init(&data->fork[i].mutex, NULL)
-			|| pthread_mutex_init(&data->philo[i].mutex, NULL))
+		if (pthread_mutex_init(&data->fork[i].mutex, NULL))
+		{
+			ft_destroy_mutexes(i, data);
 			return (ft_error("philo: mutex init failed", PERROR, 1));
+		}
+		if (pthread_mutex_init(&data->philo[i].mutex, NULL))
+		{
+			pthread_mutex_destroy(&data->fork[i].mutex);
+			ft_destroy_mutexes(i, data);
+			return (ft_error("philo: mutex init failed", PERROR, 1));
+		}
 		ft_assign_forks(&data->philo[i], data->fork);
 	}
+	return (0);
+}
+
+static int	ft_init_data(t_data *data)
+{
+	data->fork = malloc(sizeof(t_fork) * data->philo_nbr);
+	data->philo = malloc(sizeof(t_philo) * data->philo_nbr);
+	if (!data->fork || !data->philo)
+		return (ft_error("philo: malloc failed", PERROR, 1));
+	if (pthread_mutex_init(&data->state_mutex, NULL))
+		return (ft_error("philo: mutex init failed", PERROR, 1));
+	if (pthread_mutex_init(&data->write_mutex, NULL))
+	{
+		pthread_mutex_destroy(&data->state_mutex);
+		return (ft_error("philo: mutex init failed", PERROR, 1));
+	}
+	if (ft_init_philos(data))
+		return (1);
+	data->mutex_init = true;
 	return (0);
 }
 
