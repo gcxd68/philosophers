@@ -74,6 +74,7 @@ static void	*ft_dinner(void *data)
 		ft_write_state(SLEEPING, philo);
 		ft_usleep(d->time_to_sleep, d);
 		ft_write_state(THINKING, philo);
+		ft_usleep((d->time_to_die - d->time_to_eat - d->time_to_sleep) / 2, d);
 	}
 	return (NULL);
 }

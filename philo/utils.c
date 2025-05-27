@@ -26,17 +26,16 @@ void	ft_destroy_mutexes(int philo_nbr, t_data *data)
 	pthread_mutex_destroy(&data->write_mutex);
 }
 
-int	ft_cleanup(t_data *data, int error_code)
+void	ft_cleanup(t_data *data)
 {
 	if (!data)
-		return (0);
+		return ;
 	if (data->mutex_init)
 		ft_destroy_mutexes(data->philo_nbr, data);
 	if (data->fork)
 		free(data->fork);
 	if (data->philo)
 		free(data->philo);
-	return (error_code);
 }
 
 int	ft_error(const char *err_msg, t_om output_mode, int error_code)
@@ -50,7 +49,7 @@ int	ft_error(const char *err_msg, t_om output_mode, int error_code)
 		err_msg_len = 0;
 		while (err_msg[err_msg_len])
 			err_msg_len++;
-		if (write (2, err_msg, err_msg_len) < 0)
+		if (write(2, err_msg, err_msg_len) < 0)
 			perror("philo: write failed");
 	}
 	return (error_code);

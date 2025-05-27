@@ -104,12 +104,14 @@ int	main(int argc, char *argv[])
 				"[number_of_times_each_philosopher_must_eat]\n", WRITE, 2));
 	ret = ft_parse_input(&data, argv);
 	if (ret == 2)
-		return (ft_cleanup(&data, 2));
-	else if (ret)
-		return (ft_cleanup(&data, EXIT_SUCCESS));
-	if (ft_init_data(&data))
-		return (ft_cleanup(&data, EXIT_FAILURE));
-	if (ft_sim(&data))
-		exit_code = EXIT_FAILURE;
-	return (ft_cleanup(&data, exit_code));
+		exit_code = 2;
+	else if (!ret)
+	{
+		if (ft_init_data(&data))
+			exit_code = EXIT_FAILURE;
+		else if (ft_sim(&data))
+			exit_code = EXIT_FAILURE;
+	}
+	ft_cleanup(&data);
+	return (exit_code);
 }
