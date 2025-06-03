@@ -12,7 +12,6 @@
 
 #include "philo.h"
 
-/*
 static void	ft_write_state_debug(t_ps state, t_philo *philo, long elapsed_time)
 {
 	int	meal_ct;
@@ -61,27 +60,6 @@ void	ft_write_state(t_ps state, t_philo *philo)
 		else if (state == DIED)
 			printf("%ld %d died\n", elapsed_time, philo->id + 1);
 	}
-	pthread_mutex_unlock(&philo->data->write_mutex);
-}
-*/
-
-void	ft_write_state(t_ps state, t_philo *philo)
-{
-	long	elapsed_time;
-
-	pthread_mutex_lock(&philo->data->write_mutex);
-	elapsed_time = ft_get_time(MILLISECOND) - philo->data->start_time;
-	if ((state == TAKING_FIRST_FORK || state == TAKING_SECOND_FORK)
-		&& !ft_sim_is_over(philo->data))
-		printf("%ld %d has taken a fork\n", elapsed_time, philo->id + 1);
-	else if (state == EATING && !ft_sim_is_over(philo->data))
-		printf("%ld %d is eating\n", elapsed_time, philo->id + 1);
-	else if (state == SLEEPING && !ft_sim_is_over(philo->data))
-		printf("%ld %d is sleeping\n", elapsed_time, philo->id + 1);
-	else if (state == THINKING && !ft_sim_is_over(philo->data))
-		printf("%ld %d is thinking\n", elapsed_time, philo->id + 1);
-	else if (state == DIED)
-		printf("%ld %d died\n", elapsed_time, philo->id + 1);
 	pthread_mutex_unlock(&philo->data->write_mutex);
 }
 
