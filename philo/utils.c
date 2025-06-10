@@ -12,12 +12,12 @@
 
 #include "philo.h"
 
-void	ft_destroy_mutexes(int philo_nbr, t_data *data)
+void	ft_destroy_mutexes(int n, t_data *data)
 {
 	int	i;
 
 	i = -1;
-	while (++i < philo_nbr)
+	while (++i < n)
 	{
 		pthread_mutex_destroy(&data->philo[i].mutex);
 		pthread_mutex_destroy(&data->fork[i].mutex);
@@ -40,27 +40,31 @@ void	ft_cleanup(t_data *data)
 
 int	ft_error(const char *err_msg, t_om output_mode, int error_code)
 {
-	size_t	err_msg_len;
+	size_t	len;
 
 	if (output_mode == PERROR)
 		perror(err_msg);
 	else if (output_mode == WRITE)
 	{
-		err_msg_len = 0;
-		while (err_msg[err_msg_len])
-			err_msg_len++;
-		if (write(2, err_msg, err_msg_len) < 0)
+		len = 0;
+		while (err_msg[len])
+			len++;
+		if (write(2, err_msg, len) < 0)
 			perror("philo: write failed");
 	}
 	return (error_code);
 }
 
-long	ft_get_time(t_tc time_code)
+long	ft_get_time(t_tc time_code, t_data *data)
 {
 	struct timeval	tv;
 
 	if (gettimeofday(&tv, NULL) < 0)
-		return (ft_error("philo: gettimeofday failed", PERROR, -1));
+	{
+		ft_error("philo: gettimeofday failed", PERROR, -1);
+		ft_set_bool(&data->state_mutex, &data->end_sim, true);
+		return (-1);
+	}
 	else if (time_code == MILLISECOND)
 		return ((tv.tv_sec * 1e3) + tv.tv_usec / 1e3);
 	else if (time_code == MICROSECOND)

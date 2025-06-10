@@ -26,6 +26,8 @@ static int	ft_parse_input(t_data *data, char *argv[])
 				"arguments must be positive integers or zero\n", WRITE, 2));
 	if (!argv[5])
 		data->max_meals = -1;
+	data->think_time
+		= (data->time_to_die - data->time_to_eat - data->time_to_sleep) / 2;
 	if (!data->philo_nbr || !data->max_meals)
 		return (ft_error("philo: simulation cannot proceed with zero "
 				"philosophers or a maximum meal count of zero\n", WRITE, 3));

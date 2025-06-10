@@ -52,6 +52,7 @@ struct s_data
 	long		time_to_die;
 	long		time_to_eat;
 	long		time_to_sleep;
+	long		think_time;
 	long		max_meals;
 	long		start_time;
 	bool		end_sim;
@@ -85,12 +86,6 @@ typedef enum e_output_mode
 	PERROR
 }	t_om;
 
-void	ft_destroy_mutexes(int philo_nbr, t_data *data);
-void	ft_cleanup(t_data *data);
-int		ft_error(const char *err_msg, t_om output_mode, int error_code);
-long	ft_get_time(t_tc time_code);
-long	ft_atol_p(const char *nptr);
-
 int		ft_sim(t_data *data);
 void	*ft_monitor(void *data);
 void	ft_write_state(t_ps state, t_philo *philo);
@@ -100,5 +95,11 @@ bool	ft_get_bool(t_mutex *mutex, bool *value);
 void	ft_set_long(t_mutex *mutex, long *dest, long value);
 long	ft_get_long(t_mutex *mutex, long *value);
 bool	ft_sim_is_over(t_data *data);
+
+void	ft_destroy_mutexes(int n, t_data *data);
+void	ft_cleanup(t_data *data);
+int		ft_error(const char *err_msg, t_om output_mode, int error_code);
+long	ft_get_time(t_tc time_code, t_data *data);
+long	ft_atol_p(const char *nptr);
 
 #endif

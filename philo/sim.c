@@ -14,24 +14,26 @@
 
 static void	ft_usleep(long sleep_time, t_data *data)
 {
-	const long	start_time = ft_get_time(MICROSECOND);
+	const long	start_time = ft_get_time(MICROSECOND, data);
 	const long	end_time = start_time + sleep_time;
 	long		current_time;
+	long		remaining_time;
 
-	if (start_time < 0)
-		return ;
-	while (!ft_sim_is_over(data))
+	while (1)
 	{
-		current_time = ft_get_time(MICROSECOND);
-		if (current_time < 0 || current_time >= end_time)
+		current_time = ft_get_time(MICROSECOND, data);
+		remaining_time = end_time - current_time;
+		if (ft_sim_is_over(data) || remaining_time <= 0)
 			break ;
-		if (end_time - current_time > 1000)
-			usleep((end_time - current_time) * 3 / 4);
+		else if (remaining_time > 1000)
+			usleep(remaining_time - 1000);
 	}
 }
 
 static void	ft_eat(t_philo *philo)
 {
+	long	last_meal_time;
+
 	pthread_mutex_lock(&philo->first_fork->mutex);
 	ft_write_state(TAKING_FIRST_FORK, philo);
 	if (philo->data->philo_nbr == 1)
@@ -39,17 +41,19 @@ static void	ft_eat(t_philo *philo)
 			usleep(100);
 	else
 	{
-		pthread_mutex_lock(&philo->second_fork->mutex);
 		ft_write_state(TAKING_SECOND_FORK, philo);
+		pthread_mutex_lock(&philo->second_fork->mutex);
 		ft_write_state(EATING, philo);
 		pthread_mutex_lock(&philo->mutex);
-		philo->last_meal_time = ft_get_time(MILLISECOND);
-		philo->meal_ct++;
-		if (philo->data->max_meals > 0
-			&& philo->meal_ct == philo->data->max_meals)
+		last_meal_time = ft_get_time(MILLISECOND, philo->data);
+		if (last_meal_time >= 0)
+			philo->last_meal_time = last_meal_time;
+		if (!ft_sim_is_over(philo->data) && philo->data->max_meals > 0
+			&& ++philo->meal_ct == philo->data->max_meals)
 			philo->is_full = true;
 		pthread_mutex_unlock(&philo->mutex);
-		ft_usleep(philo->data->time_to_eat, philo->data);
+		if (!ft_sim_is_over(philo->data))
+			ft_usleep(philo->data->time_to_eat, philo->data);
 		pthread_mutex_unlock(&philo->second_fork->mutex);
 	}
 	pthread_mutex_unlock(&philo->first_fork->mutex);
@@ -69,12 +73,15 @@ static void	*ft_dinner(void *data)
 	while (!ft_sim_is_over(d))
 	{
 		ft_eat(philo);
-		if (ft_get_bool(&philo->mutex, &philo->is_full))
+		if (ft_get_bool(&philo->mutex, &philo->is_full) || ft_sim_is_over(d))
 			break ;
 		ft_write_state(SLEEPING, philo);
 		ft_usleep(d->time_to_sleep, d);
+		if (ft_sim_is_over(d))
+			break ;
 		ft_write_state(THINKING, philo);
-		ft_usleep((d->time_to_die - d->time_to_eat - d->time_to_sleep) / 2, d);
+		if (d->think_time > 0)
+			ft_usleep(d->think_time, d);
 	}
 	return (NULL);
 }
@@ -108,11 +115,13 @@ static void	ft_start_threads(t_data *data)
 
 int	ft_sim(t_data *data)
 {
-	int	i;
+	int		i;
+	long	start_time;
 
-	data->start_time = ft_get_time(MILLISECOND);
-	if (data->start_time < 0)
+	start_time = ft_get_time(MILLISECOND, data);
+	if (start_time < 0)
 		return (-1);
+	data->start_time = start_time;
 	i = -1;
 	while (++i < data->philo_nbr)
 		ft_set_long(&data->philo[i].mutex, &data->philo[i].last_meal_time,
