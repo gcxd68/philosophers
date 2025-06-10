@@ -14,16 +14,14 @@
 
 static void	ft_usleep(long sleep_time, t_data *data)
 {
-	const long	start_time = ft_get_time(MICROSECOND);
+	const long	start_time = ft_get_time(MICROSECOND, data);
 	const long	end_time = start_time + sleep_time;
 	long		current_time;
 
-	if (start_time < 0)
-		return ;
 	while (!ft_sim_is_over(data))
 	{
-		current_time = ft_get_time(MICROSECOND);
-		if (current_time < 0 || current_time >= end_time)
+		current_time = ft_get_time(MICROSECOND, data);
+		if (ft_sim_is_over(data) || current_time >= end_time)
 			break ;
 		if (end_time - current_time > 1000)
 			usleep((end_time - current_time) * 3 / 4);
@@ -43,13 +41,16 @@ static void	ft_eat(t_philo *philo)
 		ft_write_state(TAKING_SECOND_FORK, philo);
 		ft_write_state(EATING, philo);
 		pthread_mutex_lock(&philo->mutex);
-		philo->last_meal_time = ft_get_time(MILLISECOND);
-		philo->meal_ct++;
-		if (philo->data->max_meals > 0
-			&& philo->meal_ct == philo->data->max_meals)
-			philo->is_full = true;
+		philo->last_meal_time = ft_get_time(MILLISECOND, philo->data);
+		if (!ft_sim_is_over(philo->data))
+		{
+			philo->meal_ct++;
+			if (philo->data->max_meals > 0
+				&& philo->meal_ct == philo->data->max_meals)
+				philo->is_full = true;
+			ft_usleep(philo->data->time_to_eat, philo->data);
+		}
 		pthread_mutex_unlock(&philo->mutex);
-		ft_usleep(philo->data->time_to_eat, philo->data);
 		pthread_mutex_unlock(&philo->second_fork->mutex);
 	}
 	pthread_mutex_unlock(&philo->first_fork->mutex);
@@ -69,12 +70,16 @@ static void	*ft_dinner(void *data)
 	while (!ft_sim_is_over(d))
 	{
 		ft_eat(philo);
-		if (ft_get_bool(&philo->mutex, &philo->is_full))
+		if (ft_sim_is_over(d) || ft_get_bool(&philo->mutex, &philo->is_full))
 			break ;
 		ft_write_state(SLEEPING, philo);
 		ft_usleep(d->time_to_sleep, d);
+		if (ft_sim_is_over(d))
+			break ;
 		ft_write_state(THINKING, philo);
 		ft_usleep((d->time_to_die - d->time_to_eat - d->time_to_sleep) / 2, d);
+		if (ft_sim_is_over(d))
+			break ;
 	}
 	return (NULL);
 }
@@ -110,8 +115,8 @@ int	ft_sim(t_data *data)
 {
 	int	i;
 
-	data->start_time = ft_get_time(MILLISECOND);
-	if (data->start_time < 0)
+	data->start_time = ft_get_time(MILLISECOND, data);
+	if (ft_sim_is_over(data))
 		return (-1);
 	i = -1;
 	while (++i < data->philo_nbr)

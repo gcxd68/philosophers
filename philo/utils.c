@@ -55,12 +55,15 @@ int	ft_error(const char *err_msg, t_om output_mode, int error_code)
 	return (error_code);
 }
 
-long	ft_get_time(t_tc time_code)
+long	ft_get_time(t_tc time_code, t_data *data)
 {
 	struct timeval	tv;
 
 	if (gettimeofday(&tv, NULL) < 0)
-		return (ft_error("philo: gettimeofday failed", PERROR, -1));
+	{
+		ft_set_bool(&data->state_mutex, &data->end_sim, true);
+		ft_error("philo: gettimeofday failed", PERROR, 0);
+	}
 	else if (time_code == MILLISECOND)
 		return ((tv.tv_sec * 1e3) + tv.tv_usec / 1e3);
 	else if (time_code == MICROSECOND)

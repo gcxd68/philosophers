@@ -48,5 +48,7 @@ long	ft_get_long(t_mutex *mutex, long *value)
 
 bool	ft_sim_is_over(t_data *data)
 {
-	return (ft_get_bool(&data->state_mutex, &data->end_sim));
+	const bool	ret = ft_get_bool(&data->state_mutex, &data->end_sim);
+
+	return (ret);
 }
