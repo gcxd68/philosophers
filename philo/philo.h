@@ -88,7 +88,7 @@ typedef enum e_output_mode
 void	ft_destroy_mutexes(int philo_nbr, t_data *data);
 void	ft_cleanup(t_data *data);
 int		ft_error(const char *err_msg, t_om output_mode, int error_code);
-long	ft_get_time(t_tc time_code, t_data *data);
+long	ft_get_time(t_tc time_code);
 long	ft_atol_p(const char *nptr);
 
 int		ft_sim(t_data *data);
