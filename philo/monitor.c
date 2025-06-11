@@ -68,7 +68,7 @@ static int	ft_fed_or_dead(t_data *d, t_philo *philo, long time_since_last_meal)
 	bool	all_full;
 	int		i;
 
-	if (time_since_last_meal > d->time_to_die / 1e3
+	if (time_since_last_meal >= d->time_to_die / 1e3
 		&& !ft_get_bool(&philo->mutex, &philo->is_full))
 	{
 		ft_set_bool(&d->state_mutex, &d->end_sim, true);
