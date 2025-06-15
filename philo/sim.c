@@ -25,8 +25,8 @@ static void	ft_usleep(long sleep_time, t_data *data)
 		remaining_time = end_time - current_time;
 		if (ft_sim_is_over(data) || remaining_time <= 0)
 			break ;
-		else if (remaining_time > 1000)
-			usleep(remaining_time - 1000);
+		else if (remaining_time > 350)
+			usleep(remaining_time - 350);
 	}
 }
 
@@ -86,50 +86,53 @@ static void	*ft_dinner(void *data)
 	return (NULL);
 }
 
-static void	ft_start_threads(t_data *data)
+static int	ft_start_threads(t_data *data)
 {
-	pthread_t	monitor;
-	int			i;
+	int	status;
+	int	i;
 
+	status = 0;
 	i = -1;
 	while (++i < data->philo_nbr && !ft_sim_is_over(data))
 	{
 		if (pthread_create(&data->philo[i].thread, NULL, ft_dinner,
 				&data->philo[i]))
 		{
-			ft_error("philo: pthread_create failed", PERROR, 0);
+			status = ft_error("philo: pthread_create failed", PERROR, 1);
 			ft_set_bool(&data->state_mutex, &data->end_sim, true);
+			return (status);
 		}
 	}
-	if (pthread_create(&monitor, NULL, ft_monitor, data))
+	if (pthread_create(&data->monitor, NULL, ft_monitor, data))
 	{
-		ft_error("philo: pthread_create failed", PERROR, 0);
+		status = ft_error("philo: pthread_create failed", PERROR, 1);
 		ft_set_bool(&data->state_mutex, &data->end_sim, true);
 	}
-	else
-	{
-		ft_set_bool(&data->state_mutex, &data->all_threads_ready, true);
-		pthread_join(monitor, NULL);
-	}
+	return (status);
 }
 
 int	ft_sim(t_data *data)
 {
 	int		i;
-	long	start_time;
+	int		status;
 
-	start_time = ft_get_time(MILLISECOND, data);
-	if (start_time < 0)
-		return (-1);
-	data->start_time = start_time;
+	status = ft_start_threads(data);
+	if (!status)
+	{
+		data->start_time = ft_get_time(MILLISECOND, data);
+		if (data->start_time < 0)
+			status = 1;
+	}
 	i = -1;
-	while (++i < data->philo_nbr)
+	while (++i < data->philo_nbr && !status)
 		ft_set_long(&data->philo[i].mutex, &data->philo[i].last_meal_time,
 			data->start_time);
-	ft_start_threads(data);
+	ft_set_bool(&data->state_mutex, &data->all_threads_ready, true);
+	if (data->monitor)
+		pthread_join(data->monitor, NULL);
 	i = -1;
 	while (++i < data->philo_nbr)
 		if (data->philo[i].thread)
 			pthread_join(data->philo[i].thread, NULL);
-	return (0);
+	return (status);
 }

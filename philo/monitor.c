@@ -100,7 +100,7 @@ void	*ft_monitor(void *data)
 
 	d = (t_data *)data;
 	while (!ft_get_bool(&d->state_mutex, &d->all_threads_ready))
-		usleep(100);
+		usleep(500);
 	while (!ft_sim_is_over(d))
 	{
 		i = -1;

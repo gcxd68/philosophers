@@ -58,6 +58,7 @@ struct s_data
 	bool		end_sim;
 	bool		all_threads_ready;
 	bool		mutex_init;
+	pthread_t	monitor;
 	t_mutex		state_mutex;
 	t_mutex		write_mutex;
 	t_fork		*fork;
