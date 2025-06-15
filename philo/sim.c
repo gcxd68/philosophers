@@ -48,8 +48,8 @@ static void	ft_eat(t_philo *philo)
 		last_meal_time = ft_get_time(MILLISECOND, philo->data);
 		if (last_meal_time >= 0)
 			philo->last_meal_time = last_meal_time;
-		if (!ft_sim_is_over(philo->data) && philo->data->max_meals > 0
-			&& ++philo->meal_ct == philo->data->max_meals)
+		if (!ft_sim_is_over(philo->data) && ++philo->meal_ct
+			== philo->data->max_meals && philo->data->max_meals > 0)
 			philo->is_full = true;
 		pthread_mutex_unlock(&philo->mutex);
 		if (!ft_sim_is_over(philo->data))
@@ -88,27 +88,26 @@ static void	*ft_dinner(void *data)
 
 static int	ft_start_threads(t_data *data)
 {
-	int	status;
 	int	i;
 
-	status = 0;
 	i = -1;
 	while (++i < data->philo_nbr && !ft_sim_is_over(data))
 	{
 		if (pthread_create(&data->philo[i].thread, NULL, ft_dinner,
 				&data->philo[i]))
 		{
-			status = ft_error("philo: pthread_create failed", PERROR, 1);
+			ft_error("philo: pthread_create failed", PERROR);
 			ft_set_bool(&data->state_mutex, &data->end_sim, true);
-			return (status);
+			return (1);
 		}
 	}
 	if (pthread_create(&data->monitor, NULL, ft_monitor, data))
 	{
-		status = ft_error("philo: pthread_create failed", PERROR, 1);
+		ft_error("philo: pthread_create failed", PERROR);
 		ft_set_bool(&data->state_mutex, &data->end_sim, true);
+		return (1);
 	}
-	return (status);
+	return (0);
 }
 
 int	ft_sim(t_data *data)
@@ -118,11 +117,9 @@ int	ft_sim(t_data *data)
 
 	status = ft_start_threads(data);
 	if (!status)
-	{
 		data->start_time = ft_get_time(MILLISECOND, data);
-		if (data->start_time < 0)
-			status = 1;
-	}
+	if (data->start_time < 0)
+		status = 1;
 	i = -1;
 	while (++i < data->philo_nbr && !status)
 		ft_set_long(&data->philo[i].mutex, &data->philo[i].last_meal_time,

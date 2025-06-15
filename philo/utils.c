@@ -28,8 +28,6 @@ void	ft_destroy_mutexes(int n, t_data *data)
 
 void	ft_cleanup(t_data *data)
 {
-	if (!data)
-		return ;
 	if (data->mutex_init)
 		ft_destroy_mutexes(data->philo_nbr, data);
 	if (data->fork)
@@ -38,7 +36,7 @@ void	ft_cleanup(t_data *data)
 		free(data->philo);
 }
 
-int	ft_error(const char *err_msg, t_om output_mode, int error_code)
+void	ft_error(const char *err_msg, t_om output_mode)
 {
 	size_t	len;
 
@@ -52,7 +50,6 @@ int	ft_error(const char *err_msg, t_om output_mode, int error_code)
 		if (write(2, err_msg, len) < 0)
 			perror("philo: write failed");
 	}
-	return (error_code);
 }
 
 long	ft_get_time(t_tc time_code, t_data *data)
@@ -61,7 +58,7 @@ long	ft_get_time(t_tc time_code, t_data *data)
 
 	if (gettimeofday(&tv, NULL) < 0)
 	{
-		ft_error("philo: gettimeofday failed", PERROR, -1);
+		ft_error("philo: gettimeofday failed", PERROR);
 		ft_set_bool(&data->state_mutex, &data->end_sim, true);
 		return (-1);
 	}

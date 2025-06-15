@@ -99,7 +99,7 @@ bool	ft_sim_is_over(t_data *data);
 
 void	ft_destroy_mutexes(int n, t_data *data);
 void	ft_cleanup(t_data *data);
-int		ft_error(const char *err_msg, t_om output_mode, int error_code);
+void	ft_error(const char *err_msg, t_om output_mode);
 long	ft_get_time(t_tc time_code, t_data *data);
 long	ft_atol_p(const char *nptr);
 

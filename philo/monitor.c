@@ -16,7 +16,6 @@ static void	ft_write_state_debug(t_ps state, t_philo *philo, long elapsed_time)
 {
 	int	meal_ct;
 
-	meal_ct = ft_get_long(&philo->mutex, &philo->meal_ct);
 	if (state == TAKING_FIRST_FORK)
 		printf("%6ld | Philo No.%d (ID %d) has taken the 1st fork (ID %d)\n",
 			elapsed_time, philo->id + 1, philo->id, philo->first_fork->id);
@@ -24,8 +23,11 @@ static void	ft_write_state_debug(t_ps state, t_philo *philo, long elapsed_time)
 		printf("%6ld | Philo No.%d (ID %d) has taken the 2nd fork (ID %d)\n",
 			elapsed_time, philo->id + 1, philo->id, philo->second_fork->id);
 	else if (state == EATING)
+	{
+		meal_ct = ft_get_long(&philo->mutex, &philo->meal_ct);
 		printf("%6ld | Philo No.%d (ID %d) is eating meal No.%d\n",
 			elapsed_time, philo->id + 1, philo->id, meal_ct + 1);
+	}
 	else if (state == SLEEPING)
 		printf("%6ld | Philo No.%d (ID %d) is sleeping\n", elapsed_time,
 			philo->id + 1, philo->id);
@@ -63,7 +65,7 @@ void	ft_write_state(t_ps state, t_philo *philo)
 	pthread_mutex_unlock(&philo->data->write_mutex);
 }
 
-static int	ft_fed_or_dead(t_data *d, t_philo *philo, long time_since_last_meal)
+static void	ft_fed_or_dead(t_data *d, t_philo *philo, long time_since_last_meal)
 {
 	bool	all_full;
 	int		i;
@@ -73,7 +75,7 @@ static int	ft_fed_or_dead(t_data *d, t_philo *philo, long time_since_last_meal)
 	{
 		ft_set_bool(&d->state_mutex, &d->end_sim, true);
 		ft_write_state(DIED, philo);
-		return (1);
+		return ;
 	}
 	if (d->max_meals > 0)
 	{
@@ -83,12 +85,8 @@ static int	ft_fed_or_dead(t_data *d, t_philo *philo, long time_since_last_meal)
 			if (!ft_get_bool(&d->philo[i].mutex, &d->philo[i].is_full))
 				all_full = false;
 		if (all_full)
-		{
 			ft_set_bool(&d->state_mutex, &d->end_sim, true);
-			return (1);
-		}
 	}
-	return (0);
 }
 
 void	*ft_monitor(void *data)
@@ -100,7 +98,7 @@ void	*ft_monitor(void *data)
 
 	d = (t_data *)data;
 	while (!ft_get_bool(&d->state_mutex, &d->all_threads_ready))
-		usleep(500);
+		usleep(100);
 	while (!ft_sim_is_over(d))
 	{
 		i = -1;
@@ -111,8 +109,7 @@ void	*ft_monitor(void *data)
 				return (NULL);
 			last_meal_time = ft_get_long(&d->philo[i].mutex,
 					&d->philo[i].last_meal_time);
-			if (ft_fed_or_dead(d, &d->philo[i], current_time - last_meal_time))
-				return (NULL);
+			ft_fed_or_dead(d, &d->philo[i], current_time - last_meal_time);
 		}
 		usleep(500);
 	}

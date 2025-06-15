@@ -22,15 +22,20 @@ static int	ft_parse_input(t_data *data, char *argv[])
 		data->max_meals = ft_atol_p(argv[5]);
 	if (data->philo_nbr < 0 || data->time_to_die < 0 || data->time_to_eat < 0
 		|| data->time_to_sleep < 0 || data->max_meals < 0)
-		return (ft_error("philo: "
-				"arguments must be positive integers or zero\n", WRITE, 2));
+	{
+		ft_error("philo: arguments must be positive integers or zero\n", WRITE);
+		return (2);
+	}
 	if (!argv[5])
 		data->max_meals = -1;
 	data->think_time
-		= (data->time_to_die - data->time_to_eat - data->time_to_sleep) / 2;
+		= (data->time_to_die - data->time_to_eat - data->time_to_sleep) / 3;
 	if (!data->philo_nbr || !data->max_meals)
-		return (ft_error("philo: simulation cannot proceed with zero "
-				"philosophers or a maximum meal count of zero\n", WRITE, 3));
+	{
+		ft_error("philo: simulation cannot proceed with zero "
+			"philosophers or a maximum meal count of zero\n", WRITE);
+		return (3);
+	}
 	return (0);
 }
 
@@ -60,13 +65,15 @@ static int	ft_init_philos(t_data *data)
 		if (pthread_mutex_init(&data->fork[i].mutex, NULL))
 		{
 			ft_destroy_mutexes(i, data);
-			return (ft_error("philo: mutex init failed", PERROR, 1));
+			ft_error("philo: mutex init failed", PERROR);
+			return (1);
 		}
 		if (pthread_mutex_init(&data->philo[i].mutex, NULL))
 		{
 			pthread_mutex_destroy(&data->fork[i].mutex);
 			ft_destroy_mutexes(i, data);
-			return (ft_error("philo: mutex init failed", PERROR, 1));
+			ft_error("philo: mutex init failed", PERROR);
+			return (1);
 		}
 		ft_assign_forks(&data->philo[i], data->fork);
 	}
@@ -78,13 +85,20 @@ static int	ft_init_data(t_data *data)
 	data->fork = malloc(sizeof(t_fork) * data->philo_nbr);
 	data->philo = malloc(sizeof(t_philo) * data->philo_nbr);
 	if (!data->fork || !data->philo)
-		return (ft_error("philo: malloc failed", PERROR, 1));
+	{
+		ft_error("philo: malloc failed", PERROR);
+		return (1);
+	}
 	if (pthread_mutex_init(&data->state_mutex, NULL))
-		return (ft_error("philo: mutex init failed", PERROR, 1));
+	{
+		ft_error("philo: mutex init failed", PERROR);
+		return (1);
+	}
 	if (pthread_mutex_init(&data->write_mutex, NULL))
 	{
 		pthread_mutex_destroy(&data->state_mutex);
-		return (ft_error("philo: mutex init failed", PERROR, 1));
+		ft_error("philo: mutex init failed", PERROR);
+		return (1);
 	}
 	if (ft_init_philos(data))
 		return (1);
@@ -101,9 +115,12 @@ int	main(int argc, char *argv[])
 	data = (t_data){0};
 	exit_code = EXIT_SUCCESS;
 	if (argc < 5 || argc > 6)
-		return (ft_error("Usage : ./philo number_of_philosophers "
-				"time_to_die time_to_eat time_to_sleep "
-				"[number_of_times_each_philosopher_must_eat]\n", WRITE, 2));
+	{
+		ft_error("Usage : ./philo number_of_philosophers "
+			"time_to_die time_to_eat time_to_sleep "
+			"[number_of_times_each_philosopher_must_eat]\n", WRITE);
+		return (2);
+	}
 	ret = ft_parse_input(&data, argv);
 	if (ret == 2)
 		exit_code = 2;
