@@ -58,8 +58,8 @@ long	ft_get_time(t_tc time_code, t_data *data)
 
 	if (gettimeofday(&tv, NULL) < 0)
 	{
-		ft_error("philo: gettimeofday failed", PERROR);
 		ft_set_bool(&data->state_mutex, &data->end_sim, true);
+		ft_error("philo: gettimeofday failed", PERROR);
 		return (-1);
 	}
 	else if (time_code == MILLISECOND)

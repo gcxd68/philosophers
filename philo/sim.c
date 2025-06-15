@@ -96,15 +96,15 @@ static int	ft_start_threads(t_data *data)
 		if (pthread_create(&data->philo[i].thread, NULL, ft_dinner,
 				&data->philo[i]))
 		{
-			ft_error("philo: pthread_create failed", PERROR);
 			ft_set_bool(&data->state_mutex, &data->end_sim, true);
+			ft_error("philo: pthread_create failed", PERROR);
 			return (1);
 		}
 	}
 	if (pthread_create(&data->monitor, NULL, ft_monitor, data))
 	{
-		ft_error("philo: pthread_create failed", PERROR);
 		ft_set_bool(&data->state_mutex, &data->end_sim, true);
+		ft_error("philo: pthread_create failed", PERROR);
 		return (1);
 	}
 	return (0);
