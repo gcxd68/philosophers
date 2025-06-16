@@ -23,7 +23,7 @@ static int	ft_parse_input(t_data *data, char *argv[])
 	if (data->philo_nbr < 0 || data->time_to_die < 0 || data->time_to_eat < 0
 		|| data->time_to_sleep < 0 || data->max_meals < 0)
 	{
-		ft_error("philo: arguments must be positive integers or zero\n", WRITE);
+		ft_error("philo: arguments must be positive integers or zero\n");
 		return (2);
 	}
 	if (!argv[5])
@@ -33,7 +33,7 @@ static int	ft_parse_input(t_data *data, char *argv[])
 	if (!data->philo_nbr || !data->max_meals)
 	{
 		ft_error("philo: simulation cannot proceed with zero "
-			"philosophers or a maximum meal count of zero\n", WRITE);
+			"philosophers or a maximum meal count of zero\n");
 		return (3);
 	}
 	return (0);
@@ -65,14 +65,14 @@ static int	ft_init_philos(t_data *data)
 		if (pthread_mutex_init(&data->fork[i].mutex, NULL))
 		{
 			ft_destroy_mutexes(i, data);
-			ft_error("philo: mutex init failed", PERROR);
+			perror("philo: mutex init failed");
 			return (1);
 		}
 		if (pthread_mutex_init(&data->philo[i].mutex, NULL))
 		{
 			pthread_mutex_destroy(&data->fork[i].mutex);
 			ft_destroy_mutexes(i, data);
-			ft_error("philo: mutex init failed", PERROR);
+			perror("philo: mutex init failed");
 			return (1);
 		}
 		ft_assign_forks(&data->philo[i], data->fork);
@@ -86,18 +86,18 @@ static int	ft_init_data(t_data *data)
 	data->philo = malloc(sizeof(t_philo) * data->philo_nbr);
 	if (!data->fork || !data->philo)
 	{
-		ft_error("philo: malloc failed", PERROR);
+		perror("philo: malloc failed");
 		return (1);
 	}
 	if (pthread_mutex_init(&data->state_mutex, NULL))
 	{
-		ft_error("philo: mutex init failed", PERROR);
+		perror("philo: mutex init failed");
 		return (1);
 	}
 	if (pthread_mutex_init(&data->write_mutex, NULL))
 	{
 		pthread_mutex_destroy(&data->state_mutex);
-		ft_error("philo: mutex init failed", PERROR);
+		perror("philo: mutex init failed");
 		return (1);
 	}
 	if (ft_init_philos(data))
@@ -118,7 +118,7 @@ int	main(int argc, char *argv[])
 	{
 		ft_error("Usage : ./philo number_of_philosophers "
 			"time_to_die time_to_eat time_to_sleep "
-			"[number_of_times_each_philosopher_must_eat]\n", WRITE);
+			"[number_of_times_each_philosopher_must_eat]\n");
 		return (2);
 	}
 	ret = ft_parse_input(&data, argv);

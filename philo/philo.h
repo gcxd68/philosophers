@@ -81,12 +81,6 @@ typedef enum e_time_code
 	MICROSECOND
 }	t_tc;
 
-typedef enum e_output_mode
-{
-	WRITE,
-	PERROR
-}	t_om;
-
 int		ft_sim(t_data *data);
 void	*ft_monitor(void *data);
 void	ft_write_state(t_ps state, t_philo *philo);
@@ -99,7 +93,7 @@ bool	ft_sim_is_over(t_data *data);
 
 void	ft_destroy_mutexes(int n, t_data *data);
 void	ft_cleanup(t_data *data);
-void	ft_error(const char *err_msg, t_om output_mode);
+void	ft_error(const char *err_msg);
 long	ft_get_time(t_tc time_code, t_data *data);
 long	ft_atol_p(const char *nptr);
 

@@ -36,20 +36,15 @@ void	ft_cleanup(t_data *data)
 		free(data->philo);
 }
 
-void	ft_error(const char *err_msg, t_om output_mode)
+void	ft_error(const char *err_msg)
 {
 	size_t	len;
 
-	if (output_mode == PERROR)
-		perror(err_msg);
-	else if (output_mode == WRITE)
-	{
-		len = 0;
-		while (err_msg[len])
-			len++;
-		if (write(2, err_msg, len) < 0)
-			perror("philo: write failed");
-	}
+	len = 0;
+	while (err_msg[len])
+		len++;
+	if (write(2, err_msg, len) < 0)
+		perror("philo: write failed");
 }
 
 long	ft_get_time(t_tc time_code, t_data *data)
@@ -59,7 +54,7 @@ long	ft_get_time(t_tc time_code, t_data *data)
 	if (gettimeofday(&tv, NULL) < 0)
 	{
 		ft_set_bool(&data->state_mutex, &data->end_sim, true);
-		ft_error("philo: gettimeofday failed", PERROR);
+		perror("philo: gettimeofday failed");
 		return (-1);
 	}
 	else if (time_code == MILLISECOND)
