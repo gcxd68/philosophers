@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 15:05:04 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/14 21:04:33 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/14 23:07:47 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ static void	ft_write_state_debug(t_ps state, t_philo *philo, long elapsed_time)
 	else if (state == EATING)
 	{
 		meal_ct = ft_mutex_get(&philo->mutex, &philo->meal_ct);
-		printf("%6ld | Philo No.%d (ID %d) is eating meal No.%d\n",
+		printf("%6ld | Philo No.%d (ID %d) is eating meal No.%ld\n",
 			elapsed_time, philo->id + 1, philo->id, meal_ct + 1);
 	}
 	else if (state == SLEEPING)
