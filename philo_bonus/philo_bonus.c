@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.c                                            :+:      :+:    :+:   */
+/*   philo_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 13:34:45 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/14 20:54:58 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/14 21:02:19 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "philo_bonus.h"
 
 static int	ft_parse_input(t_data *data, char *argv[])
 {
@@ -23,7 +23,7 @@ static int	ft_parse_input(t_data *data, char *argv[])
 	if (data->philo_nbr < 0 || data->time_to_die < 0 || data->time_to_eat < 0
 		|| data->time_to_sleep < 0 || data->max_meals < 0)
 	{
-		ft_error("philo: arguments must be positive integers or zero\n");
+		ft_error("philo_bonus: arguments must be positive integers or zero\n");
 		return (2);
 	}
 	if (!argv[5])
@@ -32,77 +32,67 @@ static int	ft_parse_input(t_data *data, char *argv[])
 		= (data->time_to_die - data->time_to_eat - data->time_to_sleep) / 3;
 	if (!data->philo_nbr || !data->max_meals)
 	{
-		ft_error("philo: simulation cannot proceed with zero "
+		ft_error("philo_bonus: simulation cannot proceed with zero "
 			"philosophers or a maximum meal count of zero\n");
 		return (3);
 	}
 	return (0);
 }
 
-static void	ft_assign_forks(t_philo *philo, t_fork *fork)
+static int	ft_sem_init(t_data *data)
 {
-	if (philo->id % 2)
+	sem_unlink("/philo_forks");
+	sem_unlink("/philo_write");
+	sem_unlink("/philo_stop");
+	data->forks_sem = sem_open("/philo_forks", O_CREAT, 0644, data->philo_nbr);
+	data->write_sem = sem_open("/philo_write", O_CREAT, 0644, 1);
+	data->stop_sem = sem_open("/philo_stop", O_CREAT, 0644, 0);
+	if (data->forks_sem == SEM_FAILED
+		|| data->write_sem == SEM_FAILED
+		|| data->stop_sem == SEM_FAILED)
 	{
-		philo->first_fork = &fork[(philo->id + 1) % philo->data->philo_nbr];
-		philo->second_fork = &fork[philo->id];
-	}
-	else
-	{
-		philo->first_fork = &fork[philo->id];
-		philo->second_fork = &fork[(philo->id + 1) % philo->data->philo_nbr];
-	}
-}
-
-static int	ft_init_philos(t_data *data)
-{
-	int	i;
-
-	i = -1;
-	while (++i < data->philo_nbr)
-	{
-		data->fork[i].id = i;
-		data->philo[i] = (t_philo){.id = i, .data = data};
-		if (pthread_mutex_init(&data->fork[i].mutex, NULL))
-		{
-			ft_mutexes_destroy(i, data);
-			perror("philo: mutex init failed");
-			return (1);
-		}
-		if (pthread_mutex_init(&data->philo[i].mutex, NULL))
-		{
-			pthread_mutex_destroy(&data->fork[i].mutex);
-			ft_mutexes_destroy(i, data);
-			perror("philo: mutex init failed");
-			return (1);
-		}
-		ft_assign_forks(&data->philo[i], data->fork);
+		perror("philo_bonus: sem_open failed");
+		return (1);
 	}
 	return (0);
 }
 
-static int	ft_init_data(t_data *data)
+static int	ft_philo_init(t_data *data)
 {
-	data->fork = malloc(sizeof(t_fork) * data->philo_nbr);
+	const char	*prefix = "/philo_lock_";
+	char		name[16];
+	int			i;
+
+	i = -1;
+	while (prefix[++i])
+		name[i] = prefix[i];
+	name[15] = '\0';
+	i = -1;
+	while (++i < data->philo_nbr)
+	{
+		data->philo[i] = (t_philo){.id = i, .data = data};
+		name[12] = '0' + i / 100;
+		name[13] = '0' + (i / 10) % 10;
+		name[14] = '0' + i % 10;
+		sem_unlink(name);
+		data->philo[i].lock_sem = sem_open(name, O_CREAT, 0644, 1);
+		if (data->philo[i].lock_sem == SEM_FAILED)
+			return (perror("philo_bonus: sem_open failed"), 1);
+	}
+	return (0);
+}
+
+static int	ft_data_init(t_data *data)
+{
+	data->pid = malloc(sizeof(pid_t) * data->philo_nbr);
 	data->philo = malloc(sizeof(t_philo) * data->philo_nbr);
-	if (!data->fork || !data->philo)
+	if (!data->pid || !data->philo)
 	{
-		perror("philo: malloc failed");
+		perror("philo_bonus: malloc failed");
 		return (1);
 	}
-	if (pthread_mutex_init(&data->state_mutex, NULL))
-	{
-		perror("philo: mutex init failed");
+	if (ft_sem_init(data) || ft_philo_init(data))
 		return (1);
-	}
-	if (pthread_mutex_init(&data->write_mutex, NULL))
-	{
-		pthread_mutex_destroy(&data->state_mutex);
-		perror("philo: mutex init failed");
-		return (1);
-	}
-	if (ft_init_philos(data))
-		return (1);
-	data->mutex_init = 1;
 	return (0);
 }
 
@@ -112,8 +102,6 @@ int	main(int argc, char *argv[])
 	int		exit_code;
 	int		ret;
 
-	data = (t_data){0};
-	exit_code = EXIT_SUCCESS;
 	if (argc < 5 || argc > 6)
 	{
 		ft_error("Usage : ./philo number_of_philosophers "
@@ -121,12 +109,14 @@ int	main(int argc, char *argv[])
 			"[number_of_times_each_philosopher_must_eat]\n");
 		return (2);
 	}
+	data = (t_data){0};
+	exit_code = EXIT_SUCCESS;
 	ret = ft_parse_input(&data, argv);
 	if (ret == 2)
 		exit_code = 2;
 	else if (!ret)
 	{
-		if (ft_init_data(&data))
+		if (ft_data_init(&data))
 			exit_code = EXIT_FAILURE;
 		else if (ft_sim(&data))
 			exit_code = EXIT_FAILURE;

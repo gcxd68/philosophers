@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   utils_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/09 12:48:14 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/14 20:55:11 by gdosch           ###   ########.fr       */
+/*   Created: 2026/05/14 11:08:52 by gdosch            #+#    #+#             */
+/*   Updated: 2026/05/14 21:10:01 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "philo_bonus.h"
 
 long	ft_atol_s(const char *nptr)
 {
@@ -43,17 +43,16 @@ void	ft_error(const char *err_msg)
 	while (err_msg[len])
 		len++;
 	if (write(2, err_msg, len) < 0)
-		perror("philo: write failed");
+		perror("philo_bonus: write failed");
 }
 
-long	ft_get_time(t_tc time_code, t_data *data)
+long	ft_get_time(t_tc time_code)
 {
 	struct timeval	tv;
 
 	if (gettimeofday(&tv, NULL) < 0)
 	{
-		ft_mutex_set(&data->state_mutex, &data->end_sim, 1);
-		perror("philo: gettimeofday failed");
+		perror("philo_bonus: gettimeofday failed");
 		return (-1);
 	}
 	else if (time_code == MILLISECOND)
@@ -65,16 +64,18 @@ long	ft_get_time(t_tc time_code, t_data *data)
 
 void	ft_usleep(long sleep_time, t_data *data)
 {
-	const long	start_time = ft_get_time(MICROSECOND, data);
+	const long	start_time = ft_get_time(MICROSECOND);
 	const long	end_time = start_time + sleep_time;
 	long		current_time;
 	long		remaining_time;
 
 	while (1)
 	{
-		current_time = ft_get_time(MICROSECOND, data);
+		current_time = ft_get_time(MICROSECOND);
 		remaining_time = end_time - current_time;
-		if (ft_sim_is_over(data) || remaining_time <= 0)
+		if (current_time < 0)
+			ft_abort(data);
+		if (remaining_time <= 0)
 			break ;
 		else if (remaining_time > 350)
 			usleep(remaining_time - 350);
@@ -83,10 +84,29 @@ void	ft_usleep(long sleep_time, t_data *data)
 
 void	ft_cleanup(t_data *data)
 {
-	if (data->mutex_init)
-		ft_mutexes_destroy(data->philo_nbr, data);
-	if (data->fork)
-		free(data->fork);
+	const char	*prefix = "/philo_lock_";
+	char		name[16];
+	int			i;
+
+	ft_sem_remove(data->forks_sem, "/philo_forks");
+	ft_sem_remove(data->write_sem, "/philo_write");
+	ft_sem_remove(data->stop_sem, "/philo_stop");
 	if (data->philo)
+	{
+		i = -1;
+		while (prefix[++i])
+			name[i] = prefix[i];
+		name[15] = '\0';
+		i = -1;
+		while (++i < data->philo_nbr)
+		{
+			name[12] = '0' + i / 100;
+			name[13] = '0' + (i / 10) % 10;
+			name[14] = '0' + i % 10;
+			ft_sem_remove(data->philo[i].lock_sem, name);
+		}
 		free(data->philo);
+	}
+	if (data->pid)
+		free(data->pid);
 }

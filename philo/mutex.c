@@ -1,42 +1,39 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   getset.c                                           :+:      :+:    :+:   */
+/*   mutex.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 12:19:24 by gdosch            #+#    #+#             */
-/*   Updated: 2025/05/20 19:15:18 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/14 20:34:58 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	ft_set_bool(t_mutex *mutex, bool *dest, bool value)
+void	ft_mutexes_destroy(int n, t_data *data)
+{
+	int	i;
+
+	i = -1;
+	while (++i < n)
+	{
+		pthread_mutex_destroy(&data->philo[i].mutex);
+		pthread_mutex_destroy(&data->fork[i].mutex);
+	}
+	pthread_mutex_destroy(&data->state_mutex);
+	pthread_mutex_destroy(&data->write_mutex);
+}
+
+void	ft_mutex_set(t_mutex *mutex, long *dest, long value)
 {
 	pthread_mutex_lock(mutex);
 	*dest = value;
 	pthread_mutex_unlock(mutex);
 }
 
-bool	ft_get_bool(t_mutex *mutex, bool *value)
-{
-	bool	ret;
-
-	pthread_mutex_lock(mutex);
-	ret = *value;
-	pthread_mutex_unlock(mutex);
-	return (ret);
-}
-
-void	ft_set_long(t_mutex *mutex, long *dest, long value)
-{
-	pthread_mutex_lock(mutex);
-	*dest = value;
-	pthread_mutex_unlock(mutex);
-}
-
-long	ft_get_long(t_mutex *mutex, long *value)
+long	ft_mutex_get(t_mutex *mutex, long *value)
 {
 	long	ret;
 
@@ -46,9 +43,9 @@ long	ft_get_long(t_mutex *mutex, long *value)
 	return (ret);
 }
 
-bool	ft_sim_is_over(t_data *data)
+long	ft_sim_is_over(t_data *data)
 {
-	const bool	ret = ft_get_bool(&data->state_mutex, &data->end_sim);
+	const long	ret = ft_mutex_get(&data->state_mutex, &data->end_sim);
 
 	return (ret);
 }

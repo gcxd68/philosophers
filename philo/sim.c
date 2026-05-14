@@ -6,29 +6,11 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 11:25:17 by gdosch            #+#    #+#             */
-/*   Updated: 2025/05/26 15:22:36 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/14 20:55:07 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-
-static void	ft_usleep(long sleep_time, t_data *data)
-{
-	const long	start_time = ft_get_time(MICROSECOND, data);
-	const long	end_time = start_time + sleep_time;
-	long		current_time;
-	long		remaining_time;
-
-	while (1)
-	{
-		current_time = ft_get_time(MICROSECOND, data);
-		remaining_time = end_time - current_time;
-		if (ft_sim_is_over(data) || remaining_time <= 0)
-			break ;
-		else if (remaining_time > 350)
-			usleep(remaining_time - 350);
-	}
-}
 
 static void	ft_eat(t_philo *philo)
 {
@@ -50,7 +32,7 @@ static void	ft_eat(t_philo *philo)
 			philo->last_meal_time = last_meal_time;
 		if (!ft_sim_is_over(philo->data) && ++philo->meal_ct
 			== philo->data->max_meals && philo->data->max_meals > 0)
-			philo->is_full = true;
+			philo->is_full = 1;
 		pthread_mutex_unlock(&philo->mutex);
 		if (!ft_sim_is_over(philo->data))
 			ft_usleep(philo->data->time_to_eat, philo->data);
@@ -66,14 +48,14 @@ static void	*ft_dinner(void *data)
 
 	philo = (t_philo *)data;
 	d = philo->data;
-	while (!ft_get_bool(&d->state_mutex, &d->all_threads_ready))
+	while (!ft_mutex_get(&d->state_mutex, &d->all_threads_ready))
 		usleep(100);
-	if (philo->id % 2 == 0)
+	if (philo->id % 2)
 		usleep(500);
 	while (!ft_sim_is_over(d))
 	{
 		ft_eat(philo);
-		if (ft_get_bool(&philo->mutex, &philo->is_full) || ft_sim_is_over(d))
+		if (ft_mutex_get(&philo->mutex, &philo->is_full) || ft_sim_is_over(d))
 			break ;
 		ft_write_state(SLEEPING, philo);
 		ft_usleep(d->time_to_sleep, d);
@@ -96,14 +78,14 @@ static int	ft_start_threads(t_data *data)
 		if (pthread_create(&data->philo[i].thread, NULL, ft_dinner,
 				&data->philo[i]))
 		{
-			ft_set_bool(&data->state_mutex, &data->end_sim, true);
+			ft_mutex_set(&data->state_mutex, &data->end_sim, 1);
 			perror("philo: pthread_create failed");
 			return (1);
 		}
 	}
 	if (pthread_create(&data->monitor, NULL, ft_monitor, data))
 	{
-		ft_set_bool(&data->state_mutex, &data->end_sim, true);
+		ft_mutex_set(&data->state_mutex, &data->end_sim, 1);
 		perror("philo: pthread_create failed");
 		return (1);
 	}
@@ -122,9 +104,9 @@ int	ft_sim(t_data *data)
 		status = 1;
 	i = -1;
 	while (++i < data->philo_nbr && !status)
-		ft_set_long(&data->philo[i].mutex, &data->philo[i].last_meal_time,
+		ft_mutex_set(&data->philo[i].mutex, &data->philo[i].last_meal_time,
 			data->start_time);
-	ft_set_bool(&data->state_mutex, &data->all_threads_ready, true);
+	ft_mutex_set(&data->state_mutex, &data->all_threads_ready, 1);
 	if (data->monitor)
 		pthread_join(data->monitor, NULL);
 	i = -1;

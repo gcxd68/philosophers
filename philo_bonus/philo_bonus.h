@@ -1,50 +1,44 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.h                                            :+:      :+:    :+:   */
+/*   philo_bonus.h                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/06 13:34:54 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/14 20:55:03 by gdosch           ###   ########.fr       */
+/*   Created: 2026/05/14 11:09:06 by gdosch            #+#    #+#             */
+/*   Updated: 2026/05/14 21:06:17 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PHILO_H
-# define PHILO_H
+#ifndef PHILO_BONUS_H
+# define PHILO_BONUS_H
 
-// Include(s)
 # include <limits.h>
 # include <pthread.h>
 # include <stdlib.h>
 # include <stdio.h>
 # include <unistd.h>
 # include <sys/time.h>
+# include <semaphore.h>
+# include <fcntl.h>
+# include <sys/stat.h>
+# include <sys/wait.h>
+# include <signal.h>
 
 // Define(s)
 # define DEBUG_MODE 0
 
-// Typedef(s)
-typedef pthread_mutex_t	t_mutex;
+// typedef(s)
 typedef struct s_data	t_data;
 
 // structure(s)
-typedef struct s_fork
-{
-	int			id;
-	t_mutex		mutex;
-}	t_fork;
-
 typedef struct s_philo
 {
 	int			id;
 	pthread_t	thread;
-	t_fork		*first_fork;
-	t_fork		*second_fork;
 	long		last_meal_time;
 	long		meal_ct;
-	long		is_full;
-	t_mutex		mutex;
+	sem_t		*lock_sem;
 	t_data		*data;
 }	t_philo;
 
@@ -57,13 +51,10 @@ struct s_data
 	long		think_time;
 	long		max_meals;
 	long		start_time;
-	long		end_sim;
-	long		all_threads_ready;
-	long		mutex_init;
-	pthread_t	monitor;
-	t_mutex		state_mutex;
-	t_mutex		write_mutex;
-	t_fork		*fork;
+	sem_t		*forks_sem;
+	sem_t		*write_sem;
+	sem_t		*stop_sem;
+	pid_t		*pid;
 	t_philo		*philo;
 };
 
@@ -84,23 +75,23 @@ typedef enum e_time_code
 	MICROSECOND
 }	t_tc;
 
-// sim.c
+// sim_bonus.c
 int		ft_sim(t_data *data);
 
-// monitor.c
+// monitor_bonus.c
 void	*ft_monitor(void *data);
 void	ft_write_state(t_ps state, t_philo *philo);
+void	ft_abort(t_data *data);
 
-// mutex.c
-void	ft_mutexes_destroy(int n, t_data *data);
-void	ft_mutex_set(t_mutex *mutex, long *dest, long value);
-long	ft_mutex_get(t_mutex *mutex, long *value);
-long	ft_sim_is_over(t_data *data);
+// sem_bonus.c
+void	ft_sem_set(sem_t *sem, long *dest, long value);
+long	ft_sem_get(sem_t *sem, long *value);
+void	ft_sem_remove(sem_t *sem, const char *sem_name);
 
-// utils.c
+// utils_bonus.c
 long	ft_atol_s(const char *nptr);
 void	ft_error(const char *err_msg);
-long	ft_get_time(t_tc time_code, t_data *data);
+long	ft_get_time(t_tc time_code);
 void	ft_usleep(long sleep_time, t_data *data);
 void	ft_cleanup(t_data *data);
 

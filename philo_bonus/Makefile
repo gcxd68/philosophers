@@ -5,23 +5,23 @@
 #                                                     +:+ +:+         +:+      #
 #    By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/11/05 11:47:52 by gdosch            #+#    #+#              #
-#    Updated: 2026/05/14 19:54:13 by gdosch           ###   ########.fr        #
+#    Created: 2026/05/14 10:12:10 by gdosch            #+#    #+#              #
+#    Updated: 2026/05/14 19:54:19 by gdosch           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME =			philo
+NAME =			philo_bonus
 CC =			cc
-CFLAGS =		-Wall -Wextra -Werror# -g3 -fsanitize=thread
+CFLAGS =		-Wall -Wextra -Werror# -g3 -fsanitize=address
 
-SRC =			monitor.c \
-				mutex.c \
-				philo.c \
-				sim.c \
-				utils.c
+SRC =			monitor_bonus.c \
+				philo_bonus.c \
+				sem_bonus.c \
+				sim_bonus.c \
+				utils_bonus.c
 
 OBJ =			$(SRC:.c=.o)
-HEADER =		philo.h
+HEADER =		philo_bonus.h
 
 .PHONY:			all clean fclean re
 
