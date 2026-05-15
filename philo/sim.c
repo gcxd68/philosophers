@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 11:25:17 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/14 20:55:07 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/15 12:14:15 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,17 +23,14 @@ static void	ft_eat(t_philo *philo)
 			usleep(100);
 	else
 	{
-		ft_write_state(TAKING_SECOND_FORK, philo);
 		pthread_mutex_lock(&philo->second_fork->mutex);
-		ft_write_state(EATING, philo);
-		pthread_mutex_lock(&philo->mutex);
 		last_meal_time = ft_get_time(MILLISECOND, philo->data);
 		if (last_meal_time >= 0)
-			philo->last_meal_time = last_meal_time;
+			ft_mutex_set(&philo->mutex, &philo->last_meal_time, last_meal_time);
+		ft_write_state(TAKING_SECOND_FORK_AND_EATING, philo);
 		if (!ft_sim_is_over(philo->data) && ++philo->meal_ct
 			== philo->data->max_meals && philo->data->max_meals > 0)
-			philo->is_full = 1;
-		pthread_mutex_unlock(&philo->mutex);
+			ft_mutex_set(&philo->mutex, &philo->is_full, 1);
 		if (!ft_sim_is_over(philo->data))
 			ft_usleep(philo->data->time_to_eat, philo->data);
 		pthread_mutex_unlock(&philo->second_fork->mutex);

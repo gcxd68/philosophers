@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 13:34:54 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/14 20:55:03 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/15 12:26:42 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,8 +71,7 @@ struct s_data
 typedef enum e_philo_state
 {
 	TAKING_FIRST_FORK,
-	TAKING_SECOND_FORK,
-	EATING,
+	TAKING_SECOND_FORK_AND_EATING,
 	SLEEPING,
 	THINKING,
 	DIED

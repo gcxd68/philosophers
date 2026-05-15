@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 11:08:57 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/14 21:07:16 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/15 12:27:35 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,11 @@ static void	ft_eat(t_philo *philo)
 		return ;
 	}
 	sem_wait(philo->data->forks_sem);
-	ft_write_state(TAKING_SECOND_FORK, philo);
-	ft_write_state(EATING, philo);
 	last_meal_time = ft_get_time(MILLISECOND);
 	if (last_meal_time < 0)
 		ft_abort(philo->data);
 	ft_sem_set(philo->lock_sem, &philo->last_meal_time, last_meal_time);
+	ft_write_state(TAKING_SECOND_FORK_AND_EATING, philo);
 	philo->meal_ct++;
 	ft_usleep(philo->data->time_to_eat, philo->data);
 	sem_post(philo->data->forks_sem);

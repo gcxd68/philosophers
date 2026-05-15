@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 11:08:52 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/14 21:10:01 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/15 11:22:50 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,8 +77,8 @@ void	ft_usleep(long sleep_time, t_data *data)
 			ft_abort(data);
 		if (remaining_time <= 0)
 			break ;
-		else if (remaining_time > 350)
-			usleep(remaining_time - 350);
+		else if (remaining_time > 500)
+			usleep(remaining_time - 500);
 	}
 }
 
