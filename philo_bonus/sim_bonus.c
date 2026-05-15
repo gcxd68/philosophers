@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 11:08:57 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/15 18:35:09 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/15 20:50:31 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,10 +71,7 @@ static int	ft_start_processes(t_data *data)
 			return (1);
 		}
 		else if (data->pid[i] == 0)
-		{
 			ft_dinner(&data->philo[i]);
-			exit(EXIT_SUCCESS);
-		}
 	}
 	return (0);
 }
