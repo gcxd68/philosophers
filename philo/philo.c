@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 13:34:45 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/15 18:24:51 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/15 20:15:12 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,12 +98,12 @@ int	main(int argc, char *argv[])
 	int		exit_code;
 	int		ret;
 
-	data = (t_data){0};
-	exit_code = EXIT_SUCCESS;
 	if (argc < 5 || argc > 6)
 		return (ft_error("Usage : ./philo number_of_philosophers "
 				"time_to_die time_to_eat time_to_sleep "
 				"[number_of_times_each_philosopher_must_eat]\n", 2));
+	data = (t_data){0};
+	exit_code = EXIT_SUCCESS;
 	ret = ft_parse_input(&data, argv);
 	if (ret == 2)
 		exit_code = 2;
