@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 11:08:57 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/16 16:13:04 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/16 18:01:32 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ static void	ft_eat(t_philo *philo)
 {
 	long	last_meal_time;
 
+	sem_wait(philo->data->diners_sem);
 	sem_wait(philo->data->forks_sem);
 	ft_write_state(TAKING_FIRST_FORK, philo);
 	sem_wait(philo->data->forks_sem);
@@ -24,10 +25,13 @@ static void	ft_eat(t_philo *philo)
 		ft_abort(philo->data);
 	ft_sem_set(philo->lock_sem, &philo->last_meal_time, last_meal_time);
 	ft_write_state(TAKING_SECOND_FORK_AND_EATING, philo);
-	philo->meal_ct++;
+	if (++philo->meal_ct == philo->data->max_meals
+		&& philo->data->max_meals > 0)
+		sem_post(philo->data->done_sem);
 	ft_usleep(philo->data->time_to_eat, philo->data);
 	sem_post(philo->data->forks_sem);
 	sem_post(philo->data->forks_sem);
+	sem_post(philo->data->diners_sem);
 }
 
 static void	ft_dinner(t_philo *philo)
@@ -44,8 +48,6 @@ static void	ft_dinner(t_philo *philo)
 	while (1)
 	{
 		ft_eat(philo);
-		if (d->max_meals > 0 && philo->meal_ct == d->max_meals)
-			sem_post(d->done_sem);
 		ft_write_state(SLEEPING, philo);
 		ft_usleep(d->time_to_sleep, d);
 		ft_write_state(THINKING, philo);
@@ -84,6 +86,7 @@ static void	*ft_wait_all_meals(void *arg)
 	i = -1;
 	while (++i < data->philo_nbr)
 		sem_wait(data->done_sem);
+	sem_wait(data->write_sem);
 	sem_post(data->stop_sem);
 	return (NULL);
 }
@@ -104,6 +107,7 @@ int	ft_sim(t_data *data)
 	i = -1;
 	while (++i < data->philo_nbr)
 		kill(data->pid[i], SIGKILL);
+	sem_post(data->write_sem);
 	i = -1;
 	while (++i < data->philo_nbr)
 		sem_post(data->done_sem);

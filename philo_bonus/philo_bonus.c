@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 13:34:45 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/16 16:21:57 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/16 18:01:06 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,15 +38,21 @@ static int	ft_parse_input(t_data *data, char *argv[])
 
 static int	ft_sem_init(t_data *data)
 {
+	const int	single_philo = (data->philo_nbr == 1);
+	const int	diners_nbr = data->philo_nbr - !single_philo;
+
 	sem_unlink("/philo_forks");
+	sem_unlink("/philo_diners");
 	sem_unlink("/philo_write");
 	sem_unlink("/philo_done");
 	sem_unlink("/philo_stop");
 	data->forks_sem = sem_open("/philo_forks", O_CREAT, 0644, data->philo_nbr);
+	data->diners_sem = sem_open("/philo_diners", O_CREAT, 0644, diners_nbr);
 	data->write_sem = sem_open("/philo_write", O_CREAT, 0644, 1);
 	data->done_sem = sem_open("/philo_done", O_CREAT, 0644, 0);
 	data->stop_sem = sem_open("/philo_stop", O_CREAT, 0644, 0);
 	if (data->forks_sem == SEM_FAILED
+		|| data->diners_sem == SEM_FAILED
 		|| data->write_sem == SEM_FAILED
 		|| data->done_sem == SEM_FAILED
 		|| data->stop_sem == SEM_FAILED)

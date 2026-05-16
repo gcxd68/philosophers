@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 11:08:52 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/16 16:19:23 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/16 18:01:21 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,7 @@ void	ft_cleanup(t_data *data)
 	int	i;
 
 	ft_sem_remove(data->forks_sem, "/philo_forks");
+	ft_sem_remove(data->diners_sem, "/philo_diners");
 	ft_sem_remove(data->write_sem, "/philo_write");
 	ft_sem_remove(data->done_sem, "/philo_done");
 	ft_sem_remove(data->stop_sem, "/philo_stop");

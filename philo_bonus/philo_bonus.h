@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 11:09:06 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/16 16:23:55 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/16 18:04:46 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ struct s_data
 	long		max_meals;
 	long		start_time;
 	sem_t		*forks_sem;
+	sem_t		*diners_sem;
 	sem_t		*write_sem;
 	sem_t		*done_sem;
 	sem_t		*stop_sem;
