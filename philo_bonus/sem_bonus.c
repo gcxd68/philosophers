@@ -6,11 +6,21 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 18:23:11 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/14 21:00:22 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/16 16:19:06 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
+
+char	*ft_sem_name(int id)
+{
+	static char	name[16] = "/philo_lock_000";
+
+	name[12] = '0' + id / 100;
+	name[13] = '0' + (id / 10) % 10;
+	name[14] = '0' + id % 10;
+	return (name);
+}
 
 void	ft_sem_set(sem_t *sem, long *dest, long value)
 {

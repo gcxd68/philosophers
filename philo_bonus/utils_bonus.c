@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 11:08:52 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/15 18:14:40 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/16 16:19:23 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,27 +81,17 @@ void	ft_usleep(long sleep_time, t_data *data)
 
 void	ft_cleanup(t_data *data)
 {
-	const char	*prefix = "/philo_lock_";
-	char		name[16];
-	int			i;
+	int	i;
 
 	ft_sem_remove(data->forks_sem, "/philo_forks");
 	ft_sem_remove(data->write_sem, "/philo_write");
+	ft_sem_remove(data->done_sem, "/philo_done");
 	ft_sem_remove(data->stop_sem, "/philo_stop");
 	if (data->philo)
 	{
 		i = -1;
-		while (prefix[++i])
-			name[i] = prefix[i];
-		name[15] = '\0';
-		i = -1;
 		while (++i < data->philo_nbr)
-		{
-			name[12] = '0' + i / 100;
-			name[13] = '0' + (i / 10) % 10;
-			name[14] = '0' + i % 10;
-			ft_sem_remove(data->philo[i].lock_sem, name);
-		}
+			ft_sem_remove(data->philo[i].lock_sem, ft_sem_name(i));
 		free(data->philo);
 	}
 	if (data->pid)

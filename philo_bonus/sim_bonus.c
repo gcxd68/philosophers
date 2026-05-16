@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 11:08:57 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/15 20:54:33 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/16 16:13:04 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,15 +44,14 @@ static void	ft_dinner(t_philo *philo)
 	while (1)
 	{
 		ft_eat(philo);
-		if (d->max_meals > 0 && philo->meal_ct >= d->max_meals)
-			break ;
+		if (d->max_meals > 0 && philo->meal_ct == d->max_meals)
+			sem_post(d->done_sem);
 		ft_write_state(SLEEPING, philo);
 		ft_usleep(d->time_to_sleep, d);
 		ft_write_state(THINKING, philo);
 		if (d->think_time > 0)
 			ft_usleep(d->think_time, d);
 	}
-	exit(EXIT_SUCCESS);
 }
 
 static int	ft_start_processes(t_data *data)
@@ -84,7 +83,7 @@ static void	*ft_wait_all_meals(void *arg)
 	data = (t_data *)arg;
 	i = -1;
 	while (++i < data->philo_nbr)
-		waitpid(-1, NULL, 0);
+		sem_wait(data->done_sem);
 	sem_post(data->stop_sem);
 	return (NULL);
 }
@@ -105,6 +104,12 @@ int	ft_sim(t_data *data)
 	i = -1;
 	while (++i < data->philo_nbr)
 		kill(data->pid[i], SIGKILL);
+	i = -1;
+	while (++i < data->philo_nbr)
+		sem_post(data->done_sem);
 	pthread_join(waiter_thread, NULL);
+	i = -1;
+	while (++i < data->philo_nbr)
+		waitpid(-1, NULL, 0);
 	return (0);
 }

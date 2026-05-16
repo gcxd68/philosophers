@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 13:34:45 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/15 19:09:57 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/16 16:21:57 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,12 +40,15 @@ static int	ft_sem_init(t_data *data)
 {
 	sem_unlink("/philo_forks");
 	sem_unlink("/philo_write");
+	sem_unlink("/philo_done");
 	sem_unlink("/philo_stop");
 	data->forks_sem = sem_open("/philo_forks", O_CREAT, 0644, data->philo_nbr);
 	data->write_sem = sem_open("/philo_write", O_CREAT, 0644, 1);
+	data->done_sem = sem_open("/philo_done", O_CREAT, 0644, 0);
 	data->stop_sem = sem_open("/philo_stop", O_CREAT, 0644, 0);
 	if (data->forks_sem == SEM_FAILED
 		|| data->write_sem == SEM_FAILED
+		|| data->done_sem == SEM_FAILED
 		|| data->stop_sem == SEM_FAILED)
 		return (ft_error("philo_bonus: sem_open failed\n", 1));
 	return (0);
@@ -53,21 +56,14 @@ static int	ft_sem_init(t_data *data)
 
 static int	ft_philo_init(t_data *data)
 {
-	const char	*prefix = "/philo_lock_";
-	char		name[16];
-	int			i;
+	char	*name;
+	int		i;
 
-	i = -1;
-	while (prefix[++i])
-		name[i] = prefix[i];
-	name[15] = '\0';
 	i = -1;
 	while (++i < data->philo_nbr)
 	{
 		data->philo[i] = (t_philo){.id = i, .data = data};
-		name[12] = '0' + i / 100;
-		name[13] = '0' + (i / 10) % 10;
-		name[14] = '0' + i % 10;
+		name = ft_sem_name(i);
 		sem_unlink(name);
 		data->philo[i].lock_sem = sem_open(name, O_CREAT, 0644, 1);
 		if (data->philo[i].lock_sem == SEM_FAILED)

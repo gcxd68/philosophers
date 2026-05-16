@@ -6,7 +6,7 @@
 /*   By: gdosch <gdosch@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 11:09:06 by gdosch            #+#    #+#             */
-/*   Updated: 2026/05/15 18:46:21 by gdosch           ###   ########.fr       */
+/*   Updated: 2026/05/16 16:23:55 by gdosch           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ struct s_data
 	long		start_time;
 	sem_t		*forks_sem;
 	sem_t		*write_sem;
+	sem_t		*done_sem;
 	sem_t		*stop_sem;
 	pid_t		*pid;
 	t_philo		*philo;
@@ -83,6 +84,7 @@ void	ft_write_state(t_ps state, t_philo *philo);
 void	ft_abort(t_data *data);
 
 // sem_bonus.c
+char	*ft_sem_name(int id);
 void	ft_sem_set(sem_t *sem, long *dest, long value);
 long	ft_sem_get(sem_t *sem, long *value);
 void	ft_sem_remove(sem_t *sem, const char *sem_name);
