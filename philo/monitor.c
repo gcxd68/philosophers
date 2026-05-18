@@ -60,36 +60,32 @@ void	ft_write_state(t_ps state, t_philo *philo)
 	pthread_mutex_unlock(&philo->data->write_mutex);
 }
 
-static void	ft_fed_or_dead(t_philo *philo, long last_meal_time, int is_full)
+static int	ft_fed_or_dead(t_philo *philo)
 {
 	long	current_time;
+	long	last_meal_time;
+	long	is_full;
 
+	pthread_mutex_lock(&philo->mutex);
+	last_meal_time = philo->last_meal_time;
+	is_full = philo->is_full;
+	pthread_mutex_unlock(&philo->mutex);
 	current_time = ft_get_time(MS, philo->data);
 	if (ft_sim_is_over(philo->data))
-		return ;
+		return (0);
 	if (current_time - last_meal_time >= philo->data->time_to_die / 1e3
 		&& !is_full)
 	{
 		ft_mutex_set(&philo->data->state_mutex, &philo->data->end_sim, 1);
 		ft_write_state(DIED, philo);
-		return ;
+		return (0);
 	}
-}
-
-static void	ft_get_philo_state(t_philo *philo,
-											long *last_meal_time, long *is_full)
-{
-	pthread_mutex_lock(&philo->mutex);
-	*last_meal_time = philo->last_meal_time;
-	*is_full = philo->is_full;
-	pthread_mutex_unlock(&philo->mutex);
+	return (is_full);
 }
 
 void	*ft_monitor(void *data)
 {
 	t_data	*d;
-	long	last_meal_time;
-	long	is_full;
 	int		full_count;
 	int		i;
 
@@ -101,12 +97,8 @@ void	*ft_monitor(void *data)
 		i = -1;
 		full_count = 0;
 		while (++i < d->philo_nbr && !ft_sim_is_over(d))
-		{
-			ft_get_philo_state(&d->philo[i], &last_meal_time, &is_full);
-			ft_fed_or_dead(&d->philo[i], last_meal_time, is_full);
-			if (is_full)
+			if (ft_fed_or_dead(&d->philo[i]))
 				full_count++;
-		}
 		if (d->max_meals > 0 && full_count == d->philo_nbr)
 			ft_mutex_set(&d->state_mutex, &d->end_sim, 1);
 		usleep(250);

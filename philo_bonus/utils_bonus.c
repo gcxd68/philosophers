@@ -30,7 +30,7 @@ long	ft_atol_s(const char *nptr)
 			return (-1);
 		nptr++;
 	}
-	if ((*nptr < '0' || *nptr > '9') && *nptr != '\0')
+	if (*nptr && (*nptr < '0' || *nptr > '9'))
 		return (-1);
 	return ((long)res);
 }
@@ -83,17 +83,10 @@ void	ft_usleep(long sleep_time, t_data *data)
 
 void	ft_cleanup(t_data *data)
 {
-	ft_remove_sem(data->forks_sem, "/philo_forks");
-	ft_remove_sem(data->diners_sem, "/philo_diners");
-	ft_remove_sem(data->write_sem, "/philo_write");
-	ft_remove_sem(data->done_sem, "/philo_done");
-	ft_remove_sem(data->stop_sem, "/philo_stop");
+	if (data->sem_init)
+		ft_remove_all_sems(data->philo_nbr, data);
 	if (data->philo)
-	{
-		if (data->philo_sem_init)
-			ft_remove_philo_sems(data->philo_nbr, data);
 		free(data->philo);
-	}
 	if (data->pid)
 		free(data->pid);
 }

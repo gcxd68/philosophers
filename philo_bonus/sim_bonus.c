@@ -24,7 +24,7 @@ static void	ft_eat(t_philo *philo)
 	sem_wait(d->forks_sem);
 	last_meal_time = ft_get_time(MS);
 	if (last_meal_time < 0)
-		ft_abort(philo->data);
+		ft_abort(d);
 	ft_sem_set(philo->lock_sem, &philo->last_meal_time, last_meal_time);
 	ft_write_state(TAKING_SECOND_FORK_AND_EATING, philo);
 	if (++philo->meal_ct == d->max_meals)

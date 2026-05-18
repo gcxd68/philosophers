@@ -56,7 +56,10 @@ static int	ft_sem_init(t_data *data)
 		|| data->write_sem == SEM_FAILED
 		|| data->done_sem == SEM_FAILED
 		|| data->stop_sem == SEM_FAILED)
+	{
+		ft_remove_all_sems(0, data);
 		return (ft_error("philo_bonus: sem_open failed\n", 1));
+	}
 	return (0);
 }
 
@@ -74,11 +77,10 @@ static int	ft_philo_init(t_data *data)
 		data->philo[i].lock_sem = sem_open(name, O_CREAT, 0644, 1);
 		if (data->philo[i].lock_sem == SEM_FAILED)
 		{
-			ft_remove_philo_sems(i, data);
+			ft_remove_all_sems(i, data);
 			return (ft_error("philo_bonus: sem_open failed\n", 1));
 		}
 	}
-	data->philo_sem_init = 1;
 	return (0);
 }
 
@@ -90,6 +92,7 @@ static int	ft_data_init(t_data *data)
 		return (ft_error("philo_bonus: malloc failed\n", 1));
 	if (ft_sem_init(data) || ft_philo_init(data))
 		return (1);
+	data->sem_init = 1;
 	return (0);
 }
 

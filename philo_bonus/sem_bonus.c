@@ -24,19 +24,23 @@ char	*ft_sem_name(int id)
 
 void	ft_remove_sem(sem_t *sem, const char *sem_name)
 {
-	if (!sem || sem == SEM_FAILED)
-		return ;
-	sem_close(sem);
+	if (sem && sem != SEM_FAILED)
+		sem_close(sem);
 	sem_unlink(sem_name);
 }
 
-void	ft_remove_philo_sems(int n, t_data *data)
+void	ft_remove_all_sems(int n, t_data *data)
 {
 	int	i;
 
 	i = -1;
 	while (++i < n)
 		ft_remove_sem(data->philo[i].lock_sem, ft_sem_name(i));
+	ft_remove_sem(data->forks_sem, "/philo_forks");
+	ft_remove_sem(data->diners_sem, "/philo_diners");
+	ft_remove_sem(data->write_sem, "/philo_write");
+	ft_remove_sem(data->done_sem, "/philo_done");
+	ft_remove_sem(data->stop_sem, "/philo_stop");
 }
 
 void	ft_sem_set(sem_t *sem, long *dest, long value)

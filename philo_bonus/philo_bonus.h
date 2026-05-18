@@ -51,7 +51,7 @@ struct s_data
 	long		think_time;
 	long		max_meals;
 	long		start_time;
-	long		philo_sem_init;
+	long		sem_init;
 	sem_t		*forks_sem;
 	sem_t		*diners_sem;
 	sem_t		*write_sem;

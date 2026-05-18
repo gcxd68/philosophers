@@ -30,7 +30,7 @@ long	ft_atol_s(const char *nptr)
 			return (-1);
 		nptr++;
 	}
-	if ((*nptr < '0' || *nptr > '9') && *nptr != '\0')
+	if (*nptr && (*nptr < '0' || *nptr > '9'))
 		return (-1);
 	return ((long)res);
 }
