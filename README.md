@@ -2,6 +2,8 @@
 
 # Philosophers 🍝
 
+![Score: 125/100](https://img.shields.io/badge/Score-125%2F100-00b4ab?style=for-the-badge&logo=42&logoColor=white)
+
 > "I never thought philosophy would be so deadly."
 
 ## Description
